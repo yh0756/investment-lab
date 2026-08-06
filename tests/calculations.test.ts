@@ -63,6 +63,12 @@ describe("리밸런싱 계산", () => {
     const r = calculateRebalancing({ assets, newMoney: 100, mode: "buy-only", feeRate: 0 });
     expect(r.rows.every((row) => row.buy >= 0 && row.sell === 0)).toBe(true);
   });
+  it("허용 오차를 설정해도 필요한 조정금액을 계산한다", () => {
+    const r = calculateRebalancing({ assets, newMoney: 100, mode: "trade", feeRate: 0, tolerance: 0.2 });
+    expect(r.rows[0].sell).toBeCloseTo(50);
+    expect(r.rows[1].buy).toBeCloseTo(150);
+    expect(r.averageGap).toBeCloseTo(0);
+  });
 });
 
 describe("목표 자산 계산", () => {
