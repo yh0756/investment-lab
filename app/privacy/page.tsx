@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "개인정보처리방침",
-  description: "투자실험실의 브라우저 저장, 접속정보 및 이메일 문의 처리 기준을 안내합니다."
+  description: "투자실험실의 브라우저 저장, 접속정보, 이메일 문의 및 광고 서비스 처리 기준을 안내합니다."
 };
 
 const updatedAt = "2026년 8월 6일";
@@ -120,20 +120,31 @@ export default function PrivacyPage() {
                   <td className="px-4 py-4">이메일 주소, 문의 내용 및 첨부자료</td>
                   <td className="px-4 py-4">문의 수신·보관·답변 / 문의 종료 후 최대 1년 이내</td>
                 </tr>
+                <tr>
+                  <td className="px-4 py-4 font-bold text-slate-900">Google AdSense</td>
+                  <td className="px-4 py-4">미국을 포함한 서비스 제공 지역 / 사이트 접속 및 광고 노출 시</td>
+                  <td className="px-4 py-4">IP 주소, 쿠키·기기 식별정보, 방문 페이지 및 광고 상호작용 정보</td>
+                  <td className="px-4 py-4">광고 제공, 빈도 제한, 부정 이용 방지 및 성과 측정 / Google 정책에 따른 기간</td>
+                </tr>
               </tbody>
             </table>
           </div>
           <div className="mt-4 flex flex-wrap gap-3 text-sm font-bold">
             <a href="https://vercel.com/legal/privacy-notice" target="_blank" rel="noreferrer" className="text-blue-700 underline underline-offset-4">Vercel 개인정보 보호 안내</a>
             <a href="https://policies.google.com/privacy?hl=ko" target="_blank" rel="noreferrer" className="text-blue-700 underline underline-offset-4">Google 개인정보처리방침</a>
+            <a href="https://adssettings.google.com/" target="_blank" rel="noreferrer" className="text-blue-700 underline underline-offset-4">Google 광고 설정</a>
           </div>
         </section>
 
         <section>
-          <h2 className="text-xl font-black text-slate-950">4. 쿠키·분석·광고</h2>
+          <h2 className="text-xl font-black text-slate-950">4. 쿠키와 광고</h2>
           <p className="mt-3">
-            현재 투자실험실은 별도의 방문 분석 도구나 광고 스크립트를 설치하지 않았으며, 맞춤형 광고를 위한 쿠키를 사용하지 않습니다.
-            향후 관련 기능을 추가하는 경우 실제 적용 내용에 맞춰 본 방침을 수정합니다.
+            투자실험실은 광고 제공을 위해 Google AdSense를 사용합니다. Google과 제3자 광고 제공업체는 쿠키 또는 유사한 기술을 사용하여
+            광고를 제공하고, 광고 노출 빈도를 조절하며, 부정 이용을 방지하고 광고 성과를 측정할 수 있습니다.
+          </p>
+          <p className="mt-3">
+            이용자는 <a href="https://adssettings.google.com/" target="_blank" rel="noreferrer" className="font-bold text-blue-700 underline underline-offset-4">Google 광고 설정</a>에서
+            개인 맞춤 광고 설정을 관리할 수 있습니다. 관련 법령에 따라 동의가 필요한 지역에서는 동의 여부에 따라 개인 맞춤 또는 비개인 맞춤 광고가 제공될 수 있습니다.
           </p>
         </section>
 
