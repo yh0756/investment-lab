@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { CalculatorQuickNav } from "@/components/calculator-quick-nav";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com"),
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ko"><body><SiteHeader />{children}<SiteFooter /></body></html>;
+  return <html lang="ko"><body><SiteHeader /><CalculatorQuickNav />{children}<SiteFooter /></body></html>;
 }

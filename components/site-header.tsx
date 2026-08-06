@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const links = [
   ["전체 계산기", "/calculators"],
-  ["투자 기초", "/guides"],
+  ["계산 기준·개념", "/guides"],
   ["이용 안내", "/about"],
   ["면책 안내", "/terms"]
 ];
