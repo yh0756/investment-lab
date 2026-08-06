@@ -66,30 +66,32 @@ export function RebalancingCalculator() {
               </div>
               <Button aria-label={`${asset.name} 삭제`} variant="ghost" size="sm" className="shrink-0" onClick={() => remove(asset.id)}><Trash2 className="h-4 w-4 text-negative" /></Button>
             </div>
-            <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(120px,0.65fr)]">
-              <label className="min-w-0 sm:col-span-2 lg:col-span-1">
+            <div className="min-w-0 space-y-3">
+              <label className="block min-w-0">
                 <span className="mb-1.5 block text-xs font-bold text-slate-600">자산명</span>
                 <input aria-label="자산명" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.name} onChange={(event) => updateAsset(asset.id, { name: event.target.value })} />
               </label>
-              <div className="min-w-0">
-                <NumberField
-                  label="현재 평가금액"
-                  value={asset.value}
-                  onChange={(assetValue) => updateAsset(asset.id, { value: assetValue })}
-                  min={0}
-                  unit="만원"
-                  inputScale={10_000}
-                />
-                <span className="mt-1 block truncate text-xs text-slate-400">{formatWon(asset.value)} · 현재 {currentWeight.toFixed(1)}%</span>
-              </div>
-              <label className="min-w-0">
-                <span className="mb-1.5 block text-xs font-bold text-slate-600">목표 비중</span>
-                <div className="relative min-w-0">
-                  <input aria-label={`${asset.name} 목표 비중`} inputMode="decimal" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 pr-9 text-sm font-bold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.target} onChange={(event) => updateAsset(asset.id, { target: Math.max(0, Number(event.target.value) || 0) })} />
-                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-bold text-slate-500">%</span>
+              <div className="grid min-w-0 grid-cols-[minmax(0,1.65fr)_minmax(96px,0.75fr)] gap-3">
+                <div className="min-w-0">
+                  <NumberField
+                    label="현재 평가금액"
+                    value={asset.value}
+                    onChange={(assetValue) => updateAsset(asset.id, { value: assetValue })}
+                    min={0}
+                    unit="만원"
+                    inputScale={10_000}
+                  />
+                  <span className="mt-1 block truncate text-xs text-slate-400">{formatWon(asset.value)} · 현재 {currentWeight.toFixed(1)}%</span>
                 </div>
-                <span className="mt-1 block text-xs text-slate-400">원하는 최종 비중</span>
-              </label>
+                <label className="min-w-0">
+                  <span className="mb-1.5 block text-xs font-bold text-slate-600">목표 비중</span>
+                  <div className="relative min-w-0">
+                    <input aria-label={`${asset.name} 목표 비중`} inputMode="decimal" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 pr-8 text-sm font-bold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.target} onChange={(event) => updateAsset(asset.id, { target: Math.max(0, Number(event.target.value) || 0) })} />
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-bold text-slate-500">%</span>
+                  </div>
+                  <span className="mt-1 block truncate text-xs text-slate-400">원하는 최종 비중</span>
+                </label>
+              </div>
             </div>
           </div>;
         })}
