@@ -16,7 +16,7 @@ export function SiteFooter() {
           </div>
         </div>
         <p className="mt-6 max-w-4xl leading-6">
-          계산 입력값은 원칙적으로 브라우저에서 처리되며 별도의 회원 데이터베이스를 운영하지 않습니다. 계산 결과는 사용자가 입력한 가정에 따른 교육용 시뮬레이션으로 실제 투자 성과를 보장하지 않습니다.
+          계산 입력값은 브라우저에서 처리되며 별도의 회원 데이터베이스를 운영하지 않습니다. 계산 결과는 입력한 가정에 따른 교육용 시뮬레이션으로 실제 투자 성과를 보장하지 않습니다.
         </p>
         <p className="mt-2 text-xs text-slate-400">© {new Date().getFullYear()} 투자실험실. All rights reserved.</p>
       </div>
