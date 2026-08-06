@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "이용약관 및 면책 안내",
   description: "투자실험실의 서비스 이용 조건, 계산 결과의 성격, 이용자 책임 및 책임 제한 범위를 안내합니다."
