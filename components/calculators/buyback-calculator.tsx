@@ -184,7 +184,7 @@ export function BuybackCalculator() {
   const buybackOnlyGrowth = result.shareEffect;
   const premiumWarning = result.premium > 0.2;
   const noNetReduction = result.netReduction <= 0 && value.buybackAmount > 0;
-  const oversized = result.buybackAmount >= result.marketCap && result.marketCap > 0;
+  const oversized = value.buybackAmount >= result.marketCap && result.marketCap > 0;
 
   const resultNode = (
     <>
