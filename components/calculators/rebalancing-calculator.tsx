@@ -33,6 +33,7 @@ export function RebalancingCalculator() {
   const { value, setValue } = useScenarioState<State>("investment-lab-rebalance", initialState);
   const result = useMemo(() => calculateRebalancing({ assets: value.assets.map((asset) => ({ ...asset, target: asset.target / 100 })), newMoney: value.newMoney, mode: value.mode, feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [value]);
   const targetSum = value.assets.reduce((sum, asset) => sum + asset.target, 0);
+  const inputCurrentTotal = value.assets.reduce((sum, asset) => sum + asset.value, 0);
   const updateAsset = (id: string, patch: Partial<Asset>) => setValue({ ...value, assets: value.assets.map((asset) => asset.id === id ? { ...asset, ...patch } : asset) });
   const remove = (id: string) => setValue({ ...value, assets: value.assets.filter((asset) => asset.id !== id) });
   const add = () => setValue({ ...value, assets: [...value.assets, { id: crypto.randomUUID(), name: "새 자산", type: "기타", value: 0, target: 0 }] });
@@ -57,14 +58,54 @@ export function RebalancingCalculator() {
     <Card>
       <CardHeader><div className="flex items-center justify-between"><div><CardTitle>포트폴리오 핵심 입력</CardTitle><p className="mt-1 text-xs text-slate-500">자산명·현재 금액·목표 비중만 입력합니다.</p></div><Button size="sm" variant="secondary" onClick={add}><Plus className="h-4 w-4" />자산 추가</Button></div></CardHeader>
       <CardContent className="space-y-3">
-        {value.assets.map((asset) => <div key={asset.id} className="grid gap-2 rounded-xl border border-slate-200 p-3 sm:grid-cols-[1.2fr_1fr_0.8fr_auto]">
-          <input aria-label="자산명" className="h-10 rounded-lg border px-2 text-sm" value={asset.name} onChange={(event) => updateAsset(asset.id, { name: event.target.value })} />
-          <input aria-label={`${asset.name} 현재 평가금액`} inputMode="numeric" className="h-10 rounded-lg border px-2 text-sm" value={asset.value} onChange={(event) => updateAsset(asset.id, { value: Math.max(0, Number(event.target.value) || 0) })} />
-          <div className="relative"><input aria-label={`${asset.name} 목표 비중`} inputMode="decimal" className="h-10 w-full rounded-lg border px-2 pr-7 text-sm" value={asset.target} onChange={(event) => updateAsset(asset.id, { target: Math.max(0, Number(event.target.value) || 0) })} /><span className="absolute right-2 top-2.5 text-xs text-slate-400">%</span></div>
-          <Button aria-label={`${asset.name} 삭제`} variant="ghost" size="sm" onClick={() => remove(asset.id)}><Trash2 className="h-4 w-4 text-negative" /></Button>
-        </div>)}
+        {value.assets.map((asset, index) => {
+          const currentWeight = inputCurrentTotal > 0 ? asset.value / inputCurrentTotal * 100 : 0;
+          return <div key={asset.id} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-400">자산 {index + 1}</p>
+                <p className="mt-0.5 truncate text-sm font-bold text-slate-700">{asset.name || "이름 없는 자산"}</p>
+              </div>
+              <Button aria-label={`${asset.name} 삭제`} variant="ghost" size="sm" className="shrink-0" onClick={() => remove(asset.id)}><Trash2 className="h-4 w-4 text-negative" /></Button>
+            </div>
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(120px,0.65fr)]">
+              <label className="min-w-0 sm:col-span-2 lg:col-span-1">
+                <span className="mb-1.5 block text-xs font-bold text-slate-600">자산명</span>
+                <input aria-label="자산명" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.name} onChange={(event) => updateAsset(asset.id, { name: event.target.value })} />
+              </label>
+              <label className="min-w-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-600">현재 평가금액</span>
+                <div className="relative min-w-0">
+                  <input aria-label={`${asset.name} 현재 평가금액`} inputMode="numeric" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.value} onChange={(event) => updateAsset(asset.id, { value: Math.max(0, Number(event.target.value) || 0) })} />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-slate-400">원</span>
+                </div>
+                <span className="mt-1 block truncate text-xs text-slate-400">{formatWon(asset.value)} · 현재 {currentWeight.toFixed(1)}%</span>
+              </label>
+              <label className="min-w-0">
+                <span className="mb-1.5 block text-xs font-bold text-slate-600">목표 비중</span>
+                <div className="relative min-w-0">
+                  <input aria-label={`${asset.name} 목표 비중`} inputMode="decimal" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 pr-9 text-sm font-bold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.target} onChange={(event) => updateAsset(asset.id, { target: Math.max(0, Number(event.target.value) || 0) })} />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-bold text-slate-500">%</span>
+                </div>
+                <span className="mt-1 block text-xs text-slate-400">원하는 최종 비중</span>
+              </label>
+            </div>
+          </div>;
+        })}
         <div className="flex flex-wrap gap-2"><Button size="sm" variant="secondary" onClick={equalize}>균등 비중</Button><Button size="sm" variant="secondary" onClick={copyCurrent}>현재 비중 복사</Button></div>
-        <div className={`rounded-xl p-3 text-sm font-bold ${Math.abs(targetSum - 100) < 0.01 ? "bg-green-50 text-positive" : "bg-red-50 text-negative"}`}>목표 비중 합계: {targetSum.toFixed(2)}%</div>
+        <div className={`rounded-2xl border p-4 ${Math.abs(targetSum - 100) < 0.01 ? "border-green-200 bg-green-50" : "border-orange-200 bg-orange-50"}`}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className={`text-sm font-bold ${Math.abs(targetSum - 100) < 0.01 ? "text-positive" : "text-orange-700"}`}>목표 비중 합계</p>
+              <p className="mt-1 text-xs text-slate-500">모든 자산의 목표 비중 합계가 100%여야 계산됩니다.</p>
+            </div>
+            <strong className={`shrink-0 text-lg ${Math.abs(targetSum - 100) < 0.01 ? "text-positive" : "text-orange-700"}`}>{targetSum.toFixed(2)}%</strong>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/80">
+            <div className={`h-full rounded-full transition-all ${Math.abs(targetSum - 100) < 0.01 ? "bg-green-500" : "bg-orange-500"}`} style={{ width: `${Math.min(Math.max(targetSum, 0), 100)}%` }} />
+          </div>
+          {Math.abs(targetSum - 100) >= 0.01 && <p className="mt-2 text-xs font-semibold text-orange-700">{targetSum < 100 ? `${(100 - targetSum).toFixed(2)}%p를 더 배분해 주세요.` : `${(targetSum - 100).toFixed(2)}%p를 줄여 주세요.`}</p>}
+        </div>
       </CardContent>
     </Card>
     <Card><CardHeader><CardTitle>리밸런싱 방식</CardTitle></CardHeader><CardContent className="space-y-5"><NumberField label="신규 투자 가능 금액" value={value.newMoney} onChange={(newMoney) => setValue({ ...value, newMoney })} min={0} unit="원" /><div className="grid grid-cols-2 gap-2"><Button variant={value.mode === "trade" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "trade" })}>매수·매도 허용</Button><Button variant={value.mode === "buy-only" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "buy-only" })}>신규자금만 활용</Button></div></CardContent></Card>
