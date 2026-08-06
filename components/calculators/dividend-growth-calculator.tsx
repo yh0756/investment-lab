@@ -44,8 +44,8 @@ const initialState: State = {
   reinvest: true,
   paymentFrequency: "annual",
   fractionalShares: true,
-  a: { name: "고배당 ETF", price: 100_000, yieldRate: 8, dividendGrowth: 1, priceGrowth: 2, fee: 0.3, growthYears: 20, laterDividendGrowth: 1 },
-  b: { name: "배당성장 ETF", price: 100_000, yieldRate: 3, dividendGrowth: 8, priceGrowth: 6, fee: 0.3, growthYears: 20, laterDividendGrowth: 3 },
+  a: { name: "고배당 ETF", price: 100_000, yieldRate: 8, dividendGrowth: 1, priceGrowth: 2, fee: 0, growthYears: 20, laterDividendGrowth: 1 },
+  b: { name: "배당성장 ETF", price: 100_000, yieldRate: 3, dividendGrowth: 8, priceGrowth: 6, fee: 0, growthYears: 20, laterDividendGrowth: 3 },
 };
 
 function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; onChange: (plan: PlanState) => void }) {
@@ -60,9 +60,8 @@ function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; o
         <NumberField label="초기 배당수익률" value={plan.yieldRate} onChange={(yieldRate) => onChange({ ...plan, yieldRate })} min={0} max={30} unit="%" slider />
         <NumberField label="연평균 배당성장률" value={plan.dividendGrowth} onChange={(dividendGrowth) => onChange({ ...plan, dividendGrowth })} min={-20} max={30} unit="%" slider />
         <NumberField label="연평균 주가상승률" value={plan.priceGrowth} onChange={(priceGrowth) => onChange({ ...plan, priceGrowth })} min={-20} max={30} unit="%" slider />
-        <AdvancedSettings title="ETF 세부 조건" description="주가·보수와 장기 성장률 둔화 가정을 설정합니다.">
+        <AdvancedSettings title="ETF 세부 조건" description="총보수와 장기 성장률 둔화 가정을 설정합니다.">
           <div className="space-y-4">
-            <NumberField label="현재 주가" value={plan.price} onChange={(price) => onChange({ ...plan, price })} min={1} unit="만원" inputScale={10_000} />
             <NumberField label="연간 총보수" value={plan.fee} onChange={(fee) => onChange({ ...plan, fee })} min={0} max={5} unit="%" />
             <NumberField label="기본 배당성장률 적용 기간" value={plan.growthYears} onChange={(growthYears) => onChange({ ...plan, growthYears: Math.round(growthYears) })} min={1} max={50} unit="년" />
             <NumberField label="이후 배당성장률" value={plan.laterDividendGrowth} onChange={(laterDividendGrowth) => onChange({ ...plan, laterDividendGrowth })} min={-20} max={30} unit="%" />
@@ -74,7 +73,7 @@ function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; o
 }
 
 export function DividendGrowthCalculator() {
-  const { value, setValue } = useScenarioState<State>("investment-lab-dividend-v2", initialState);
+  const { value, setValue } = useScenarioState<State>("investment-lab-dividend-v3", initialState);
   const result = useMemo(() => calculateDividendGrowth({
     initial: value.initial,
     years: value.years,
@@ -83,8 +82,8 @@ export function DividendGrowthCalculator() {
     paymentsPerYear: value.paymentFrequency === "monthly" ? 12 : 1,
     fractionalShares: value.fractionalShares,
     plans: [
-      { ...value.a, yieldRate: value.a.yieldRate / 100, dividendGrowth: value.a.dividendGrowth / 100, priceGrowth: value.a.priceGrowth / 100, fee: value.a.fee / 100, laterDividendGrowth: value.a.laterDividendGrowth / 100 },
-      { ...value.b, yieldRate: value.b.yieldRate / 100, dividendGrowth: value.b.dividendGrowth / 100, priceGrowth: value.b.priceGrowth / 100, fee: value.b.fee / 100, laterDividendGrowth: value.b.laterDividendGrowth / 100 },
+      { ...value.a, price: 100_000, yieldRate: value.a.yieldRate / 100, dividendGrowth: value.a.dividendGrowth / 100, priceGrowth: value.a.priceGrowth / 100, fee: value.a.fee / 100, laterDividendGrowth: value.a.laterDividendGrowth / 100 },
+      { ...value.b, price: 100_000, yieldRate: value.b.yieldRate / 100, dividendGrowth: value.b.dividendGrowth / 100, priceGrowth: value.b.priceGrowth / 100, fee: value.b.fee / 100, laterDividendGrowth: value.b.laterDividendGrowth / 100 },
     ],
   }), [value]);
   const cross = (year: number | null) => year ? `${year}년 차` : `${value.years}년 내 없음`;
@@ -120,5 +119,5 @@ export function DividendGrowthCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="배당성장 ETF 역전 시점 계산기" description="초기 배당률이 높은 투자안과 배당성장률이 높은 투자안의 연간 배당금, 누적 배당금, 총자산을 각각 비교합니다." headline="현재 배당률이 높은 ETF가 장기적으로도 항상 더 많은 배당금을 지급하는 것은 아닙니다." guideHref="/guides/dividend-growth" input={input} result={resultNode} education={[{ title: "세 가지 역전", body: "연간 배당금이 먼저 역전되어도 초기 배당 차이 때문에 누적 배당금과 총자산은 더 늦게 역전될 수 있습니다." }, { title: "가장 많이 하는 오해", body: "현재 배당률이 높다는 사실만으로 장기 총수익률이 더 높다고 볼 수 없습니다." }, { title: "재투자의 영향", body: "세후 배당금을 재투자하면 보유 주식 수가 늘어나 배당금과 평가금액에 복리 효과가 반영됩니다." }]} assumptions={["배당성장률과 주가상승률은 입력한 구간별 비율로 적용됩니다.", "배당소득세는 입력한 세율로 단순 계산합니다.", value.reinvest ? `세후 배당금은 ${value.paymentFrequency === "monthly" ? "매월" : "연말"} 주가로 재투자합니다.` : "배당금은 현금으로 누적합니다.", value.fractionalShares ? "소수점 주식 매수가 가능하다고 가정합니다." : "정수 단위 주식만 매수하고 잔액은 현금으로 보유합니다."]} />;
+  return <CalculatorShell title="배당성장 ETF 역전 시점 계산기" description="초기 배당률이 높은 투자안과 배당성장률이 높은 투자안의 연간 배당금, 누적 배당금, 총자산을 각각 비교합니다." headline="현재 배당률이 높은 ETF가 장기적으로도 항상 더 많은 배당금을 지급하는 것은 아닙니다." guideHref="/guides/dividend-growth" input={input} result={resultNode} education={[{ title: "세 가지 역전", body: "연간 배당금이 먼저 역전되어도 초기 배당 차이 때문에 누적 배당금과 총자산은 더 늦게 역전될 수 있습니다." }, { title: "가장 많이 하는 오해", body: "현재 배당률이 높다는 사실만으로 장기 총수익률이 더 높다고 볼 수 없습니다." }, { title: "재투자의 영향", body: "세후 배당금을 재투자하면 보유 주식 수가 늘어나 배당금과 평가금액에 복리 효과가 반영됩니다." }]} assumptions={["두 투자안의 현재 주가는 동일한 기준 가격으로 정규화해 계산합니다.", "배당성장률과 주가상승률은 입력한 구간별 비율로 적용됩니다.", "배당소득세는 입력한 세율로 단순 계산합니다.", value.reinvest ? `세후 배당금은 ${value.paymentFrequency === "monthly" ? "매월" : "연말"} 주가로 재투자합니다.` : "배당금은 현금으로 누적합니다.", value.fractionalShares ? "소수점 주식 매수가 가능하다고 가정합니다." : "정수 단위 주식만 매수하고 잔액은 현금으로 보유합니다."]} />;
 }
