@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { Area, CartesianGrid, ComposedChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ export function GoalAssetCalculator() {
     const month = Math.min(months, year * 12);
     return { year, 보수적: futureValue(value.current, appliedMonthly, appliedReturn - value.scenarioGap / 100, month, value.paymentTiming), 기준: futureValue(value.current, appliedMonthly, appliedReturn, month, value.paymentTiming), 낙관적: futureValue(value.current, appliedMonthly, appliedReturn + value.scenarioGap / 100, month, value.paymentTiming) };
   });
-  const csvRows = result.rows.map((row) => ({ 개월: row.month, 납입원금: Math.round(row.principal), 평가금액: Math.round(row.value), 투자수익: Math.round(row.gain), 목표금액: Math.round(row.target) }));
   const predictedDate = useMemo(() => { const date = new Date(); date.setMonth(date.getMonth() + months); return `${date.getFullYear()}년 ${date.getMonth() + 1}월`; }, [months]);
 
   const input = <>
@@ -67,5 +65,5 @@ export function GoalAssetCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="목표 자산 역산 계산기" description="목표자산을 만들기 위해 필요한 월 투자금, 연평균 수익률 또는 투자 기간을 월 복리 기준으로 역산합니다." headline="목표금액만 정하지 말고, 목표를 달성하기 위해 매월 무엇을 해야 하는지 확인해보세요." actions={<CalculatorActions value={value} reset={() => setValue(initialState)} example={() => setValue(initialState)} csvRows={csvRows} csvName="목표자산-역산.csv" />} input={input} result={resultNode} education={[{ title: "목표를 행동으로 변환", body: "목표금액을 월 투자금·수익률·기간 중 하나로 바꾸면 현재 실행해야 할 행동을 구체적으로 확인할 수 있습니다." }, { title: "현재가치와 미래가치", body: "현재가치 목표를 선택하면 물가상승률만큼 미래의 명목 목표금액을 높여 계산합니다." }, { title: "가장 많이 하는 오해", body: "기대수익률을 높게 입력하면 계획상 월 투자금은 줄지만 실제 목표 달성 가능성이 높아지는 것은 아닙니다." }]} assumptions={["연평균 수익률은 월 복리 수익률로 환산합니다.", value.paymentTiming === "begin" ? "월 투자금은 매월 초에 납입합니다." : "월 투자금은 매월 말에 납입합니다.", value.targetIsPresentValue ? "목표금액은 현재가치이며 물가상승률을 반영합니다." : "목표금액은 미래 명목금액입니다."]} />;
+  return <CalculatorShell title="목표 자산 역산 계산기" description="목표자산을 만들기 위해 필요한 월 투자금, 연평균 수익률 또는 투자 기간을 월 복리 기준으로 역산합니다." headline="목표금액만 정하지 말고, 목표를 달성하기 위해 매월 무엇을 해야 하는지 확인해보세요." guideHref="/guides/goal-asset" input={input} result={resultNode} education={[{ title: "목표를 행동으로 변환", body: "목표금액을 월 투자금·수익률·기간 중 하나로 바꾸면 현재 실행해야 할 행동을 구체적으로 확인할 수 있습니다." }, { title: "현재가치와 미래가치", body: "현재가치 목표를 선택하면 물가상승률만큼 미래의 명목 목표금액을 높여 계산합니다." }, { title: "가장 많이 하는 오해", body: "기대수익률을 높게 입력하면 계획상 월 투자금은 줄지만 실제 목표 달성 가능성이 높아지는 것은 아닙니다." }]} assumptions={["연평균 수익률은 월 복리 수익률로 환산합니다.", value.paymentTiming === "begin" ? "월 투자금은 매월 초에 납입합니다." : "월 투자금은 매월 말에 납입합니다.", value.targetIsPresentValue ? "목표금액은 현재가치이며 물가상승률을 반영합니다." : "목표금액은 미래 명목금액입니다."]} />;
 }

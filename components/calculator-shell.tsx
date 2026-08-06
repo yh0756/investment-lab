@@ -1,11 +1,12 @@
 import { ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Lightbulb } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, BookOpen, CheckCircle2, Lightbulb } from "lucide-react";
 
-export function CalculatorShell({ title, description, headline, actions, input, result, education, assumptions }: {
+export function CalculatorShell({ title, description, headline, guideHref, input, result, education, assumptions }: {
   title: string;
   description: string;
   headline: string;
-  actions: ReactNode;
+  guideHref: string;
   input: ReactNode;
   result: ReactNode;
   education: Array<{ title: string; body: string }>;
@@ -17,9 +18,15 @@ export function CalculatorShell({ title, description, headline, actions, input, 
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brand">투자실험실 계산기</p>
         <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">{title}</h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">{description}</p>
-        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-semibold leading-6 text-navy">{headline}</p>
-          <div className="shrink-0">{actions}</div>
+          <Link
+            href={guideHref}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 text-sm font-bold text-navy transition hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            개념·계산 기준 보기
+          </Link>
         </div>
       </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]">

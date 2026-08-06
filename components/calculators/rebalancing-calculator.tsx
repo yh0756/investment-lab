@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Plus, Trash2 } from "lucide-react";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,6 @@ export function RebalancingCalculator() {
     };
     setValue({ ...value, assets: sets[preset] });
   };
-  const csvRows = result.rows.map((row) => ({ 자산: row.name, 현재금액: Math.round(row.value), 현재비중: row.currentWeight, 목표비중: row.target, 목표금액: Math.round(row.targetValue), 매수금액: Math.round(row.buy), 매도금액: Math.round(row.sell), 예상최종비중: row.finalWeight }));
   const chartData = result.rows.map((row) => ({ name: row.name, current: row.currentWeight * 100, target: row.target * 100, final: row.finalWeight * 100 }));
   const mostUnder = result.rows.length ? [...result.rows].sort((a, b) => b.difference - a.difference)[0] : null;
   const riskyTypes = new Set(["국내 주식", "미국 주식", "배당 ETF", "성장 ETF", "암호화폐"]);
@@ -133,5 +131,5 @@ export function RebalancingCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="포트폴리오 리밸런싱 계산기" description="현재 자산과 목표 비중을 비교해 매수·매도 금액 또는 신규 투자금의 우선 배분안을 계산합니다." headline="어떤 자산을 더 살지 고민하기 전에 현재 비중과 목표 비중의 차이를 확인해보세요." actions={<CalculatorActions value={value} reset={() => setValue(initialState)} example={() => setValue(initialState)} csvRows={csvRows} csvName="포트폴리오-리밸런싱.csv" />} input={input} result={resultNode} education={[{ title: "리밸런싱", body: "목표 자산배분에서 벗어난 비중을 다시 조정하는 과정입니다. 수익이 난 자산 일부를 줄이고 부족한 자산을 채울 수 있습니다." }, { title: "신규자금 방식", body: "매도를 피하고 새 투자금만으로 부족 자산을 채웁니다. 이미 과대 비중인 자산이 있으면 목표를 정확히 맞추기 어렵습니다." }, { title: "가장 많이 하는 오해", body: "최근 수익률이 좋은 자산을 계속 더 사는 방식은 위험 집중을 키울 수 있습니다." }]} assumptions={["자산 유형은 분류용이며 계산에는 직접 영향을 주지 않습니다.", "매수·매도 허용 방식은 신규 투자 후 총자산을 기준으로 목표금액을 계산합니다.", `거래금액은 ${formatWon(value.minTradeUnit)} 단위로 반올림하고 목표 비중 오차 ${value.tolerance}%p 이내는 조정하지 않습니다.`]} />;
+  return <CalculatorShell title="포트폴리오 리밸런싱 계산기" description="현재 자산과 목표 비중을 비교해 매수·매도 금액 또는 신규 투자금의 우선 배분안을 계산합니다." headline="어떤 자산을 더 살지 고민하기 전에 현재 비중과 목표 비중의 차이를 확인해보세요." guideHref="/guides/portfolio-rebalancing" input={input} result={resultNode} education={[{ title: "리밸런싱", body: "목표 자산배분에서 벗어난 비중을 다시 조정하는 과정입니다. 수익이 난 자산 일부를 줄이고 부족한 자산을 채울 수 있습니다." }, { title: "신규자금 방식", body: "매도를 피하고 새 투자금만으로 부족 자산을 채웁니다. 이미 과대 비중인 자산이 있으면 목표를 정확히 맞추기 어렵습니다." }, { title: "가장 많이 하는 오해", body: "최근 수익률이 좋은 자산을 계속 더 사는 방식은 위험 집중을 키울 수 있습니다." }]} assumptions={["자산 유형은 분류용이며 계산에는 직접 영향을 주지 않습니다.", "매수·매도 허용 방식은 신규 투자 후 총자산을 기준으로 목표금액을 계산합니다.", `거래금액은 ${formatWon(value.minTradeUnit)} 단위로 반올림하고 목표 비중 오차 ${value.tolerance}%p 이내는 조정하지 않습니다.`]} />;
 }

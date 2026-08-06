@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/number-field";
@@ -24,7 +23,6 @@ export function LossRecoveryCalculator() {
   const { value, setValue } = useScenarioState<State>("investment-lab-loss", initialState);
   const result = useMemo(() => calculateLossRecovery({ ...value, lossRate: value.lossRate / 100, annualReturn: value.annualReturn / 100 }), [value]);
   const comparison = [10,20,30,40,50,60,70,80,90].map((loss) => ({ 손실률: `-${loss}%`, 필요상승률: `${(requiredRecoveryRate(loss / 100) * 100).toFixed(1)}%` }));
-  const csvRows = result.rows.map((row) => ({ 개월: row.month, 평가금액: Math.round(row.value), 목표금액: Math.round(row.target), 총납입금: Math.round(row.contributions) }));
 
   const input = <>
     <InputCard title="핵심 입력" description="현재 손실과 추가 투자 여부만 먼저 입력해 필요한 회복률을 확인하세요.">
@@ -55,5 +53,5 @@ export function LossRecoveryCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="투자 손실 회복 계산기" description="현재 손실을 회복하는 데 필요한 상승률과 추가 투자·월 적립식 투자를 반영한 예상 회복 기간을 계산합니다." headline="손실률이 커질수록 원금을 회복하기 위해 필요한 상승률은 더 빠르게 증가합니다." actions={<CalculatorActions value={value} reset={() => setValue(initialState)} example={() => setValue(initialState)} csvRows={csvRows} csvName="투자-손실-회복.csv" />} input={input} result={resultNode} education={[{ title: "50% 손실의 의미", body: "100에서 50으로 떨어진 뒤 다시 100이 되려면 50%가 아니라 100% 상승해야 합니다." }, { title: "추가 투자 효과", body: "추가 투자금은 평균매입단가와 필요 상승률을 낮출 수 있지만 투자 위험과 총 노출금액도 함께 늘립니다." }, { title: "목표 기준 구분", body: "초기 원금 회복과 총 납입 원금 회복은 서로 다른 목표입니다. 월 납입금까지 포함하면 목표금액도 계속 증가합니다." }]} assumptions={["월 수익률은 연평균 수익률을 월 복리로 환산합니다.", "매월 기존 평가금액에 수익률을 적용한 뒤 월 투자금을 더합니다.", "최대 1,200개월까지만 탐색합니다."]} />;
+  return <CalculatorShell title="투자 손실 회복 계산기" description="현재 손실을 회복하는 데 필요한 상승률과 추가 투자·월 적립식 투자를 반영한 예상 회복 기간을 계산합니다." headline="손실률이 커질수록 원금을 회복하기 위해 필요한 상승률은 더 빠르게 증가합니다." guideHref="/guides/loss-recovery" input={input} result={resultNode} education={[{ title: "50% 손실의 의미", body: "100에서 50으로 떨어진 뒤 다시 100이 되려면 50%가 아니라 100% 상승해야 합니다." }, { title: "추가 투자 효과", body: "추가 투자금은 평균매입단가와 필요 상승률을 낮출 수 있지만 투자 위험과 총 노출금액도 함께 늘립니다." }, { title: "목표 기준 구분", body: "초기 원금 회복과 총 납입 원금 회복은 서로 다른 목표입니다. 월 납입금까지 포함하면 목표금액도 계속 증가합니다." }]} assumptions={["월 수익률은 연평균 수익률을 월 복리로 환산합니다.", "매월 기존 평가금액에 수익률을 적용한 뒤 월 투자금을 더합니다.", "최대 1,200개월까지만 탐색합니다."]} />;
 }

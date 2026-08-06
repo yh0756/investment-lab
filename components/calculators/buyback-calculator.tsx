@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { NumberField } from "@/components/number-field";
 import { MetricCard } from "@/components/metric-card";
@@ -29,7 +28,6 @@ export function BuybackCalculator() {
   });
   const epsData = [{ stage: "현재 EPS", eps: result.currentEps }, { stage: "이익 성장 반영", eps: result.growthOnlyEps }, { stage: "자사주매입 반영", eps: result.finalEps }];
   const shareData = [{ stage: "현재", shares: value.shares }, { stage: "매입 후", shares: result.finalShares }];
-  const csvRows = [{ 구분: "현재 EPS", 값: result.currentEps }, { 구분: "이익 성장 반영 EPS", 값: result.growthOnlyEps }, { 구분: "최종 EPS", 값: result.finalEps }, { 구분: "사업 성장 효과", 값: result.businessEffect }, { 구분: "주식 수 감소 효과", 값: result.shareEffect }, { 구분: "순주식 수 감소율", 값: result.netReduction }];
 
   const input = <>
     <InputCard title="핵심 입력" description="기업 이익·주식 수·매입 규모와 가격만 입력하면 EPS 효과를 확인할 수 있습니다.">
@@ -63,5 +61,5 @@ export function BuybackCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="자사주매입 효과 계산기" description="기업 이익 증가와 발행주식 수 감소가 EPS 성장에 미치는 영향을 분리해 계산합니다." headline="EPS 증가는 사업 성장뿐 아니라 발행주식 수 감소로도 발생할 수 있습니다." actions={<CalculatorActions value={value} reset={() => setValue(initialState)} example={() => setValue(initialState)} csvRows={csvRows} csvName="자사주매입-EPS-효과.csv" />} input={input} result={resultNode} education={[{ title: "자사주매입 수익률", body: "자사주매입 금액을 현재 시가총액으로 나눈 비율입니다. 실제 주식 수 감소율은 평균 매입가격과 신규 발행에 따라 달라집니다." }, { title: "EPS 효과 분해", body: "순이익 증가로 높아진 EPS와 주식 수 감소로 추가 상승한 EPS를 단계별로 분리합니다." }, { title: "가장 많이 하는 오해", body: "자사주매입 금액만큼 발행주식 수가 그대로 감소하지 않습니다. 주식보상과 스톡옵션 희석을 함께 봐야 합니다." }]} assumptions={[`입력한 평균 매입가격으로 자사주를 매입하며 ${value.timing === "begin" ? "연초" : value.timing === "average" ? "연중 평균" : "연말"} 시점을 EPS 가중평균 주식 수에 반영합니다.`, "매입 주식은 유통주식 수에서 제외된다고 가정합니다.", "이자비용은 세후 금액을 예상 순이익에서 차감합니다."]} />;
+  return <CalculatorShell title="자사주매입 효과 계산기" description="기업 이익 증가와 발행주식 수 감소가 EPS 성장에 미치는 영향을 분리해 계산합니다." headline="EPS 증가는 사업 성장뿐 아니라 발행주식 수 감소로도 발생할 수 있습니다." guideHref="/guides/share-buyback" input={input} result={resultNode} education={[{ title: "자사주매입 수익률", body: "자사주매입 금액을 현재 시가총액으로 나눈 비율입니다. 실제 주식 수 감소율은 평균 매입가격과 신규 발행에 따라 달라집니다." }, { title: "EPS 효과 분해", body: "순이익 증가로 높아진 EPS와 주식 수 감소로 추가 상승한 EPS를 단계별로 분리합니다." }, { title: "가장 많이 하는 오해", body: "자사주매입 금액만큼 발행주식 수가 그대로 감소하지 않습니다. 주식보상과 스톡옵션 희석을 함께 봐야 합니다." }]} assumptions={[`입력한 평균 매입가격으로 자사주를 매입하며 ${value.timing === "begin" ? "연초" : value.timing === "average" ? "연중 평균" : "연말"} 시점을 EPS 가중평균 주식 수에 반영합니다.`, "매입 주식은 유통주식 수에서 제외된다고 가정합니다.", "이자비용은 세후 금액을 예상 순이익에서 차감합니다."]} />;
 }

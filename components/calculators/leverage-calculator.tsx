@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { BarChart, Bar, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,6 @@ export function LeverageCalculator() {
   const result = useMemo(() => calculateLeverage({ initial: value.initial, leverage: value.leverage, annualFee: value.annualFee / 100, periodsPerYear: value.periodsPerYear, returns }), [value, returns]);
   const pathTone = result.pathEffect < -0.001 ? "negative" : result.pathEffect > 0.001 ? "positive" : "default";
   const conclusion = result.pathEffect < -0.001 ? `단순 ${value.leverage}배 예상보다 ${formatPercent(Math.abs(result.pathEffect))} 낮은 결과입니다.` : result.pathEffect > 0.001 ? `안정적인 복리 경로가 단순 배수보다 ${formatPercent(result.pathEffect)} 유리하게 작용했습니다.` : "단순 배수 결과와 실제 누적 결과의 차이가 크지 않습니다.";
-  const csvRows = result.rows.map((r) => ({ 기간: r.period, 기초지수수익률: r.marketReturn, 기초지수가치: Math.round(r.marketValue), 레버리지ETF가치: Math.round(r.etfValue), 단순배수가치: Math.round(r.simpleValue) }));
   const input = <>
     <Card><CardHeader><CardTitle>시나리오 선택</CardTitle></CardHeader><CardContent className="grid grid-cols-3 gap-2">{(["repeat","custom","preset"] as const).map((m)=><Button key={m} variant={value.mode===m?"default":"secondary"} size="sm" onClick={()=>setValue({...value,mode:m})}>{m==="repeat"?"간단 반복":m==="custom"?"직접 경로":"프리셋"}</Button>)}</CardContent></Card>
     <InputCard title="핵심 조건" description="투자금과 배수, 시장 움직임만 입력하면 바로 비교할 수 있습니다.">
@@ -64,5 +62,5 @@ export function LeverageCalculator() {
       <div className="space-y-4"><ChartCard title="기간별 수익률"><ResponsiveContainer width="100%" height="100%"><BarChart data={result.rows.slice(1)}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="period"/><YAxis tickFormatter={(v)=>`${Math.round(v*100)}%`}/><Tooltip formatter={(v)=>formatPercent(Number(v))}/><Legend/><Bar dataKey="marketReturn" name="기초지수" fill="#64748b"/><Bar dataKey="leveragedPeriodReturn" name="레버리지 적용" fill="#2563eb"/></BarChart></ResponsiveContainer></ChartCard><DataTable title="기간별 상세 결과" rows={result.rows} columns={[{key:"period",label:"기간"},{key:"marketReturn",label:"기초지수 수익률",format:(v)=>formatPercent(Number(v)),align:"right"},{key:"marketValue",label:"기초지수 가치",format:(v)=>formatWon(Number(v),false),align:"right"},{key:"etfValue",label:"레버리지 ETF 가치",format:(v)=>formatWon(Number(v),false),align:"right"},{key:"simpleValue",label:"단순 배수 가치",format:(v)=>formatWon(Number(v),false),align:"right"}]} /></div>
     </AdvancedSettings>
   </>;
-  return <CalculatorShell title="레버리지 ETF 변동성 손실 계산기" description="기간별 수익률을 직접 입력해 레버리지 ETF의 일간·기간별 재설정 구조와 경로 효과를 비교합니다." headline="레버리지 ETF는 최종 지수 수익률보다 지수가 움직인 경로에 더 큰 영향을 받습니다." actions={<CalculatorActions value={value} reset={()=>setValue(initialState)} example={()=>setValue(initialState)} csvRows={csvRows} csvName="레버리지-ETF-시뮬레이션.csv"/>} input={input} result={resultNode} education={[{title:"일간 재설정",body:"대부분의 레버리지 ETF는 하루 단위 목표 수익률을 추종합니다. 장기 누적 수익률은 지수 누적 수익률의 단순 배수가 아닙니다."},{title:"가장 많이 하는 오해",body:"지수가 장기적으로 10% 상승하면 3배 ETF가 반드시 30% 상승하는 것은 아닙니다."},{title:"결과 해석",body:"실제 누적 결과와 기초지수 누적수익률의 단순 배수 차이를 경로 효과로 표시합니다."}]} assumptions={["레버리지 수익률은 각 입력 기간마다 다시 설정됩니다.","운용보수는 연간 수치를 기간별로 나누어 적용합니다.","계산상 가치가 0원 아래로 내려가면 0원으로 제한합니다."]}/>;
+  return <CalculatorShell title="레버리지 ETF 변동성 손실 계산기" description="기간별 수익률을 직접 입력해 레버리지 ETF의 일간·기간별 재설정 구조와 경로 효과를 비교합니다." headline="레버리지 ETF는 최종 지수 수익률보다 지수가 움직인 경로에 더 큰 영향을 받습니다." guideHref="/guides/leverage-etf" input={input} result={resultNode} education={[{title:"일간 재설정",body:"대부분의 레버리지 ETF는 하루 단위 목표 수익률을 추종합니다. 장기 누적 수익률은 지수 누적 수익률의 단순 배수가 아닙니다."},{title:"가장 많이 하는 오해",body:"지수가 장기적으로 10% 상승하면 3배 ETF가 반드시 30% 상승하는 것은 아닙니다."},{title:"결과 해석",body:"실제 누적 결과와 기초지수 누적수익률의 단순 배수 차이를 경로 효과로 표시합니다."}]} assumptions={["레버리지 수익률은 각 입력 기간마다 다시 설정됩니다.","운용보수는 연간 수치를 기간별로 나누어 적용합니다.","계산상 가치가 0원 아래로 내려가면 0원으로 제한합니다."]}/>;
 }

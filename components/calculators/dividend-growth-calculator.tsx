@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { CalculatorActions } from "@/components/calculator-actions";
 import { CalculatorShell } from "@/components/calculator-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,6 @@ export function DividendGrowthCalculator() {
     ],
   }), [value]);
   const cross = (year: number | null) => year ? `${year}년 차` : `${value.years}년 내 없음`;
-  const csvRows = result.rows.map((row) => ({ 연도: row.year, [`${value.a.name} 연간배당`]: Math.round(row.aDividend), [`${value.b.name} 연간배당`]: Math.round(row.bDividend), [`${value.a.name} 누적배당`]: Math.round(row.aCumulative), [`${value.b.name} 누적배당`]: Math.round(row.bCumulative), [`${value.a.name} 총자산`]: Math.round(row.aAsset), [`${value.b.name} 총자산`]: Math.round(row.bAsset) }));
 
   const input = <>
     <InputCard title="공통 핵심 조건" description="투자금과 비교 기간을 먼저 정합니다.">
@@ -122,5 +120,5 @@ export function DividendGrowthCalculator() {
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="배당성장 ETF 역전 시점 계산기" description="초기 배당률이 높은 투자안과 배당성장률이 높은 투자안의 연간 배당금, 누적 배당금, 총자산을 각각 비교합니다." headline="현재 배당률이 높은 ETF가 장기적으로도 항상 더 많은 배당금을 지급하는 것은 아닙니다." actions={<CalculatorActions value={value} reset={() => setValue(initialState)} example={() => setValue(initialState)} csvRows={csvRows} csvName="배당성장-역전시점.csv" />} input={input} result={resultNode} education={[{ title: "세 가지 역전", body: "연간 배당금이 먼저 역전되어도 초기 배당 차이 때문에 누적 배당금과 총자산은 더 늦게 역전될 수 있습니다." }, { title: "가장 많이 하는 오해", body: "현재 배당률이 높다는 사실만으로 장기 총수익률이 더 높다고 볼 수 없습니다." }, { title: "재투자의 영향", body: "세후 배당금을 재투자하면 보유 주식 수가 늘어나 배당금과 평가금액에 복리 효과가 반영됩니다." }]} assumptions={["배당성장률과 주가상승률은 입력한 구간별 비율로 적용됩니다.", "배당소득세는 입력한 세율로 단순 계산합니다.", value.reinvest ? `세후 배당금은 ${value.paymentFrequency === "monthly" ? "매월" : "연말"} 주가로 재투자합니다.` : "배당금은 현금으로 누적합니다.", value.fractionalShares ? "소수점 주식 매수가 가능하다고 가정합니다." : "정수 단위 주식만 매수하고 잔액은 현금으로 보유합니다."]} />;
+  return <CalculatorShell title="배당성장 ETF 역전 시점 계산기" description="초기 배당률이 높은 투자안과 배당성장률이 높은 투자안의 연간 배당금, 누적 배당금, 총자산을 각각 비교합니다." headline="현재 배당률이 높은 ETF가 장기적으로도 항상 더 많은 배당금을 지급하는 것은 아닙니다." guideHref="/guides/dividend-growth" input={input} result={resultNode} education={[{ title: "세 가지 역전", body: "연간 배당금이 먼저 역전되어도 초기 배당 차이 때문에 누적 배당금과 총자산은 더 늦게 역전될 수 있습니다." }, { title: "가장 많이 하는 오해", body: "현재 배당률이 높다는 사실만으로 장기 총수익률이 더 높다고 볼 수 없습니다." }, { title: "재투자의 영향", body: "세후 배당금을 재투자하면 보유 주식 수가 늘어나 배당금과 평가금액에 복리 효과가 반영됩니다." }]} assumptions={["배당성장률과 주가상승률은 입력한 구간별 비율로 적용됩니다.", "배당소득세는 입력한 세율로 단순 계산합니다.", value.reinvest ? `세후 배당금은 ${value.paymentFrequency === "monthly" ? "매월" : "연말"} 주가로 재투자합니다.` : "배당금은 현금으로 누적합니다.", value.fractionalShares ? "소수점 주식 매수가 가능하다고 가정합니다." : "정수 단위 주식만 매수하고 잔액은 현금으로 보유합니다."]} />;
 }
