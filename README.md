@@ -66,3 +66,17 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.example
 ## 주의사항
 
 본 프로젝트의 결과는 사용자가 입력한 가정에 따른 교육용 시뮬레이션이며 실제 투자 결과를 보장하지 않습니다. 실제 세금, 거래비용, 환율, 상품 구조, 추적오차와 시장 상황은 별도로 확인해야 합니다.
+
+## v15 UI update
+- Removed the fractional-share purchase toggle from the dividend growth ETF calculator.
+- Dividend reinvestment now consistently assumes fractional-share purchases.
+
+## Public deployment contact setting
+
+Set the following Vercel environment variable before a public launch to enable the private email contact button on `/contact`.
+
+```env
+NEXT_PUBLIC_CONTACT_EMAIL=your-public-contact@example.com
+```
+
+After saving the variable, redeploy the project. If the variable is not set, the contact page displays the public GitHub Issues channel only.
