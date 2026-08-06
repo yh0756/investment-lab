@@ -44,7 +44,7 @@ export function LeverageCalculator() {
   const input = <>
     <Card><CardHeader><CardTitle>시나리오 선택</CardTitle></CardHeader><CardContent className="grid grid-cols-3 gap-2">{(["repeat","custom","preset"] as const).map((m)=><Button key={m} variant={value.mode===m?"default":"secondary"} size="sm" onClick={()=>setValue({...value,mode:m})}>{m==="repeat"?"간단 반복":m==="custom"?"직접 경로":"프리셋"}</Button>)}</CardContent></Card>
     <InputCard title="핵심 조건" description="투자금과 배수, 시장 움직임만 입력하면 바로 비교할 수 있습니다.">
-      <NumberField label="초기 투자금" value={value.initial} onChange={(initial)=>setValue({...value,initial})} min={0} unit="원"/>
+      <NumberField label="초기 투자금" value={value.initial} onChange={(initial)=>setValue({...value,initial})} min={0} unit="만원" inputScale={10_000}/>
       <NumberField label="레버리지 배수" value={value.leverage} onChange={(leverage)=>setValue({...value,leverage})} min={1} max={5} step={0.1} unit="배" slider/>
       <div className="grid grid-cols-3 gap-2">{[1,2,3].map((leverage)=><Button key={leverage} size="sm" variant={value.leverage===leverage?"default":"secondary"} onClick={()=>setValue({...value,leverage})}>{leverage}배</Button>)}</div>
       {value.mode==="repeat"&&<div className="space-y-5 rounded-2xl bg-slate-50 p-4"><NumberField label="상승 구간 수익률" value={value.up} onChange={(up)=>setValue({...value,up})} min={-99} max={100} step={0.1} unit="%" slider/><NumberField label="하락 구간 수익률" value={value.down} onChange={(down)=>setValue({...value,down})} min={-99} max={100} step={0.1} unit="%" slider/><NumberField label="반복 횟수" value={value.repeats} onChange={(repeats)=>setValue({...value,repeats:Math.round(repeats)})} min={1} max={50} unit="회" slider/></div>}

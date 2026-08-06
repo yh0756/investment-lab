@@ -39,11 +39,11 @@ export function GoalAssetCalculator() {
   const input = <>
     <Card><CardHeader><CardTitle>무엇을 계산할까요?</CardTitle></CardHeader><CardContent className="grid gap-2 sm:grid-cols-3">{(["monthly","return","period"] as GoalMode[]).map((mode) => <Button key={mode} variant={value.mode === mode ? "default" : "secondary"} onClick={() => setValue({ ...value, mode })}>{mode === "monthly" ? "월 투자금" : mode === "return" ? "필요 수익률" : "투자 기간"}</Button>)}</CardContent></Card>
     <InputCard title="핵심 목표 조건" description="목표와 현재 자산을 입력하고, 계산에 필요한 조건만 설정합니다.">
-      <NumberField label="현재 보유자산" value={value.current} onChange={(current) => setValue({ ...value, current })} min={0} unit="원" />
-      <NumberField label="목표자산" value={value.target} onChange={(target) => setValue({ ...value, target })} min={0} unit="원" />
+      <NumberField label="현재 보유자산" value={value.current} onChange={(current) => setValue({ ...value, current })} min={0} unit="만원" inputScale={10_000} />
+      <NumberField label="목표자산" value={value.target} onChange={(target) => setValue({ ...value, target })} min={0} unit="만원" inputScale={10_000} />
       {value.mode !== "return" && <NumberField label="예상 연평균 수익률" value={value.annualReturn} onChange={(annualReturn) => setValue({ ...value, annualReturn })} min={-20} max={30} unit="%" slider />}
       {value.mode !== "period" && <NumberField label="투자 기간" value={value.years} onChange={(years) => setValue({ ...value, years })} min={1} max={50} unit="년" slider />}
-      {value.mode !== "monthly" && <NumberField label="월 투자금" value={value.monthly} onChange={(monthly) => setValue({ ...value, monthly })} min={0} unit="원" />}
+      {value.mode !== "monthly" && <NumberField label="월 투자금" value={value.monthly} onChange={(monthly) => setValue({ ...value, monthly })} min={0} unit="만원" inputScale={10_000} />}
     </InputCard>
     <AdvancedSettings title="납입·물가·시나리오 설정" description="기본값은 월말 납입, 명목 목표금액 기준입니다.">
       <div className="space-y-5">

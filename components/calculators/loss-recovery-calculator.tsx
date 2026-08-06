@@ -28,9 +28,9 @@ export function LossRecoveryCalculator() {
 
   const input = <>
     <InputCard title="핵심 입력" description="현재 손실과 추가 투자 여부만 먼저 입력해 필요한 회복률을 확인하세요.">
-      <NumberField label="초기 투자금" value={value.initial} onChange={(initial) => setValue({ ...value, initial })} min={0} unit="원" />
+      <NumberField label="초기 투자금" value={value.initial} onChange={(initial) => setValue({ ...value, initial })} min={0} unit="만원" inputScale={10_000} />
       <NumberField label="현재 손실률" value={value.lossRate} onChange={(lossRate) => setValue({ ...value, lossRate })} min={0} max={99} unit="%" slider />
-      <NumberField label="즉시 추가 투자금" value={value.additional} onChange={(additional) => setValue({ ...value, additional })} min={0} unit="원" />
+      <NumberField label="즉시 추가 투자금" value={value.additional} onChange={(additional) => setValue({ ...value, additional })} min={0} unit="만원" inputScale={10_000} />
       <div>
         <p className="mb-2 text-sm font-semibold text-slate-700">회복 목표</p>
         <div className="grid grid-cols-2 gap-2"><Button variant={value.target === "initial" ? "default" : "secondary"} onClick={() => setValue({ ...value, target: "initial" })}>초기 원금</Button><Button variant={value.target === "total" ? "default" : "secondary"} onClick={() => setValue({ ...value, target: "total" })}>총 납입 원금</Button></div>
@@ -38,7 +38,7 @@ export function LossRecoveryCalculator() {
       </div>
     </InputCard>
     <AdvancedSettings title="회복 기간 추정" description="예상수익률과 월 적립금을 반영해 회복 시점을 계산합니다.">
-      <div className="space-y-5"><NumberField label="향후 예상 연평균 수익률" value={value.annualReturn} onChange={(annualReturn) => setValue({ ...value, annualReturn })} min={-20} max={30} unit="%" slider /><NumberField label="월 추가 투자금" value={value.monthlyContribution} onChange={(monthlyContribution) => setValue({ ...value, monthlyContribution })} min={0} unit="원" /></div>
+      <div className="space-y-5"><NumberField label="향후 예상 연평균 수익률" value={value.annualReturn} onChange={(annualReturn) => setValue({ ...value, annualReturn })} min={-20} max={30} unit="%" slider /><NumberField label="월 추가 투자금" value={value.monthlyContribution} onChange={(monthlyContribution) => setValue({ ...value, monthlyContribution })} min={0} unit="만원" inputScale={10_000} /></div>
     </AdvancedSettings>
   </>;
 

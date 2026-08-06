@@ -73,14 +73,17 @@ export function RebalancingCalculator() {
                 <span className="mb-1.5 block text-xs font-bold text-slate-600">자산명</span>
                 <input aria-label="자산명" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.name} onChange={(event) => updateAsset(asset.id, { name: event.target.value })} />
               </label>
-              <label className="min-w-0">
-                <span className="mb-1.5 block text-xs font-bold text-slate-600">현재 평가금액</span>
-                <div className="relative min-w-0">
-                  <input aria-label={`${asset.name} 현재 평가금액`} inputMode="numeric" className="h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" value={asset.value} onChange={(event) => updateAsset(asset.id, { value: Math.max(0, Number(event.target.value) || 0) })} />
-                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-slate-400">원</span>
-                </div>
+              <div className="min-w-0">
+                <NumberField
+                  label="현재 평가금액"
+                  value={asset.value}
+                  onChange={(assetValue) => updateAsset(asset.id, { value: assetValue })}
+                  min={0}
+                  unit="만원"
+                  inputScale={10_000}
+                />
                 <span className="mt-1 block truncate text-xs text-slate-400">{formatWon(asset.value)} · 현재 {currentWeight.toFixed(1)}%</span>
-              </label>
+              </div>
               <label className="min-w-0">
                 <span className="mb-1.5 block text-xs font-bold text-slate-600">목표 비중</span>
                 <div className="relative min-w-0">
@@ -108,13 +111,13 @@ export function RebalancingCalculator() {
         </div>
       </CardContent>
     </Card>
-    <Card><CardHeader><CardTitle>리밸런싱 방식</CardTitle></CardHeader><CardContent className="space-y-5"><NumberField label="신규 투자 가능 금액" value={value.newMoney} onChange={(newMoney) => setValue({ ...value, newMoney })} min={0} unit="원" /><div className="grid grid-cols-2 gap-2"><Button variant={value.mode === "trade" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "trade" })}>매수·매도 허용</Button><Button variant={value.mode === "buy-only" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "buy-only" })}>신규자금만 활용</Button></div></CardContent></Card>
+    <Card><CardHeader><CardTitle>리밸런싱 방식</CardTitle></CardHeader><CardContent className="space-y-5"><NumberField label="신규 투자 가능 금액" value={value.newMoney} onChange={(newMoney) => setValue({ ...value, newMoney })} min={0} unit="만원" inputScale={10_000} /><div className="grid grid-cols-2 gap-2"><Button variant={value.mode === "trade" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "trade" })}>매수·매도 허용</Button><Button variant={value.mode === "buy-only" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "buy-only" })}>신규자금만 활용</Button></div></CardContent></Card>
     <AdvancedSettings title="프리셋·자산 분류·거래 조건" description="계산에 필수적이지 않은 분류와 거래 세부값입니다.">
       <div className="space-y-5">
         <div><p className="mb-2 text-sm font-semibold text-slate-700">포트폴리오 예시</p><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="secondary" onClick={() => applyPreset("6040")}>60/40</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("growth")}>성장형</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("dividend")}>배당형</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("retirement")}>은퇴형</Button></div></div>
         <div className="space-y-2"><p className="text-sm font-semibold text-slate-700">자산 유형</p>{value.assets.map((asset) => <label key={asset.id} className="grid grid-cols-[1fr_1fr] items-center gap-3 text-sm"><span className="truncate font-semibold text-slate-600">{asset.name}</span><select aria-label={`${asset.name} 자산 유형`} className="h-10 rounded-lg border px-2" value={asset.type} onChange={(event) => updateAsset(asset.id, { type: event.target.value })}>{ASSET_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>)}</div>
         <NumberField label="거래비용" value={value.feeRate} onChange={(feeRate) => setValue({ ...value, feeRate })} min={0} max={5} unit="%" />
-        <NumberField label="최소 거래단위" value={value.minTradeUnit} onChange={(minTradeUnit) => setValue({ ...value, minTradeUnit })} min={0} unit="원" />
+        <NumberField label="최소 거래단위" value={value.minTradeUnit} onChange={(minTradeUnit) => setValue({ ...value, minTradeUnit })} min={0} unit="만원" inputScale={10_000} />
         <NumberField label="허용 오차 범위" value={value.tolerance} onChange={(tolerance) => setValue({ ...value, tolerance })} min={0} max={20} unit="%p" />
       </div>
     </AdvancedSettings>

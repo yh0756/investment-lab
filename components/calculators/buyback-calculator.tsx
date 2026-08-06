@@ -33,11 +33,11 @@ export function BuybackCalculator() {
 
   const input = <>
     <InputCard title="핵심 입력" description="기업 이익·주식 수·매입 규모와 가격만 입력하면 EPS 효과를 확인할 수 있습니다.">
-      <NumberField label="현재 순이익" value={value.netIncome} onChange={(netIncome) => setValue({ ...value, netIncome })} min={0} unit="원" />
+      <NumberField label="현재 순이익" value={value.netIncome} onChange={(netIncome) => setValue({ ...value, netIncome })} min={0} unit="만원" inputScale={10_000} />
       <NumberField label="현재 발행주식 수" value={value.shares} onChange={(shares) => setValue({ ...value, shares })} min={1} unit="주" />
-      <NumberField label="현재 주가" value={value.price} onChange={(price) => setValue({ ...value, price })} min={0} unit="원" />
-      <NumberField label="자사주매입 예정 금액" value={value.buybackAmount} onChange={(buybackAmount) => setValue({ ...value, buybackAmount })} min={0} unit="원" />
-      <NumberField label="예상 평균 매입가격" value={value.averagePrice} onChange={(averagePrice) => setValue({ ...value, averagePrice })} min={0.01} unit="원" />
+      <NumberField label="현재 주가" value={value.price} onChange={(price) => setValue({ ...value, price })} min={1} unit="만원" inputScale={10_000} />
+      <NumberField label="자사주매입 예정 금액" value={value.buybackAmount} onChange={(buybackAmount) => setValue({ ...value, buybackAmount })} min={0} unit="만원" inputScale={10_000} />
+      <NumberField label="예상 평균 매입가격" value={value.averagePrice} onChange={(averagePrice) => setValue({ ...value, averagePrice })} min={1} unit="만원" inputScale={10_000} />
       <NumberField label="예상 순이익 성장률" value={value.incomeGrowth} onChange={(incomeGrowth) => setValue({ ...value, incomeGrowth })} min={-100} max={100} unit="%" slider />
     </InputCard>
     <AdvancedSettings title="희석·이자비용·매입 시점" description="주식보상과 차입 자금까지 반영할 때 조정합니다.">
@@ -45,7 +45,7 @@ export function BuybackCalculator() {
         <NumberField label="분석 기간" value={value.analysisYears} onChange={(analysisYears) => setValue({ ...value, analysisYears })} min={1} max={20} unit="년" />
         <NumberField label="신규 발행주식 수" value={value.newShares} onChange={(newShares) => setValue({ ...value, newShares })} min={0} unit="주" />
         <NumberField label="희석 가능 주식 수" value={value.dilutedShares} onChange={(dilutedShares) => setValue({ ...value, dilutedShares })} min={0} unit="주" />
-        <NumberField label="연간 이자비용" value={value.interestCost} onChange={(interestCost) => setValue({ ...value, interestCost })} min={0} unit="원" />
+        <NumberField label="연간 이자비용" value={value.interestCost} onChange={(interestCost) => setValue({ ...value, interestCost })} min={0} unit="만원" inputScale={10_000} />
         <NumberField label="법인세율" value={value.taxRate} onChange={(taxRate) => setValue({ ...value, taxRate })} min={0} max={60} unit="%" />
         <div><p className="mb-2 text-sm font-semibold text-slate-700">자사주매입 시점</p><div className="grid grid-cols-3 gap-2">{(["begin", "average", "end"] as BuybackTiming[]).map((timing) => <button key={timing} className={`min-h-11 rounded-xl border px-2 text-xs font-bold ${value.timing === timing ? "border-navy bg-navy text-white" : "border-slate-200 bg-white text-slate-600"}`} onClick={() => setValue({ ...value, timing })}>{timing === "begin" ? "연초" : timing === "average" ? "연중 평균" : "연말"}</button>)}</div></div>
       </div>

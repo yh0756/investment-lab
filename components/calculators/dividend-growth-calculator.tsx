@@ -45,8 +45,8 @@ const initialState: State = {
   reinvest: true,
   paymentFrequency: "annual",
   fractionalShares: true,
-  a: { name: "고배당 ETF", price: 100, yieldRate: 8, dividendGrowth: 1, priceGrowth: 2, fee: 0.3, growthYears: 20, laterDividendGrowth: 1 },
-  b: { name: "배당성장 ETF", price: 100, yieldRate: 3, dividendGrowth: 8, priceGrowth: 6, fee: 0.3, growthYears: 20, laterDividendGrowth: 3 },
+  a: { name: "고배당 ETF", price: 100_000, yieldRate: 8, dividendGrowth: 1, priceGrowth: 2, fee: 0.3, growthYears: 20, laterDividendGrowth: 1 },
+  b: { name: "배당성장 ETF", price: 100_000, yieldRate: 3, dividendGrowth: 8, priceGrowth: 6, fee: 0.3, growthYears: 20, laterDividendGrowth: 3 },
 };
 
 function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; onChange: (plan: PlanState) => void }) {
@@ -63,7 +63,7 @@ function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; o
         <NumberField label="연평균 주가상승률" value={plan.priceGrowth} onChange={(priceGrowth) => onChange({ ...plan, priceGrowth })} min={-20} max={30} unit="%" slider />
         <AdvancedSettings title="ETF 세부 조건" description="주가·보수와 장기 성장률 둔화 가정을 설정합니다.">
           <div className="space-y-4">
-            <NumberField label="현재 주가" value={plan.price} onChange={(price) => onChange({ ...plan, price })} min={0.01} />
+            <NumberField label="현재 주가" value={plan.price} onChange={(price) => onChange({ ...plan, price })} min={1} unit="만원" inputScale={10_000} />
             <NumberField label="연간 총보수" value={plan.fee} onChange={(fee) => onChange({ ...plan, fee })} min={0} max={5} unit="%" />
             <NumberField label="기본 배당성장률 적용 기간" value={plan.growthYears} onChange={(growthYears) => onChange({ ...plan, growthYears: Math.round(growthYears) })} min={1} max={50} unit="년" />
             <NumberField label="이후 배당성장률" value={plan.laterDividendGrowth} onChange={(laterDividendGrowth) => onChange({ ...plan, laterDividendGrowth })} min={-20} max={30} unit="%" />
@@ -75,7 +75,7 @@ function PlanForm({ title, plan, onChange }: { title: string; plan: PlanState; o
 }
 
 export function DividendGrowthCalculator() {
-  const { value, setValue } = useScenarioState<State>("investment-lab-dividend", initialState);
+  const { value, setValue } = useScenarioState<State>("investment-lab-dividend-v2", initialState);
   const result = useMemo(() => calculateDividendGrowth({
     initial: value.initial,
     years: value.years,
@@ -93,7 +93,7 @@ export function DividendGrowthCalculator() {
 
   const input = <>
     <InputCard title="공통 핵심 조건" description="투자금과 비교 기간을 먼저 정합니다.">
-      <NumberField label="초기 투자금" value={value.initial} onChange={(initial) => setValue({ ...value, initial })} min={0} unit="원" />
+      <NumberField label="초기 투자금" value={value.initial} onChange={(initial) => setValue({ ...value, initial })} min={0} unit="만원" inputScale={10_000} />
       <NumberField label="투자 기간" value={value.years} onChange={(years) => setValue({ ...value, years: Math.round(years) })} min={1} max={50} unit="년" slider />
     </InputCard>
     <PlanForm title="투자안 A · 고배당형" plan={value.a} onChange={(a) => setValue({ ...value, a })} />
