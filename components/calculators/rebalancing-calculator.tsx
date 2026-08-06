@@ -9,31 +9,30 @@ import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/number-field";
 import { MetricCard } from "@/components/metric-card";
 import { ChartCard } from "@/components/chart-card";
-import { ResultMessage } from "@/components/result-message";
 import { AdvancedSettings } from "@/components/advanced-settings";
 import { SecondaryResults } from "@/components/secondary-results";
 import { useScenarioState } from "@/lib/hooks/use-scenario-state";
-import { calculateRebalancing, type RebalanceMode } from "@/lib/calculations/rebalancing";
+import { calculateRebalancing } from "@/lib/calculations/rebalancing";
 import { formatPercent, formatWon } from "@/lib/format";
 
 interface Asset { id: string; name: string; type: string; value: number; target: number; }
-interface State { assets: Asset[]; newMoney: number; mode: RebalanceMode; feeRate: number; minTradeUnit: number; tolerance: number; }
+interface State { assets: Asset[]; newMoney: number; feeRate: number; minTradeUnit: number; tolerance: number; }
 const exampleAssets: Asset[] = [
   { id: "a", name: "미국 성장주", type: "미국 주식", value: 50_000_000, target: 40 },
   { id: "b", name: "배당 ETF", type: "배당 ETF", value: 25_000_000, target: 30 },
   { id: "c", name: "채권", type: "채권", value: 15_000_000, target: 20 },
   { id: "d", name: "금", type: "금", value: 10_000_000, target: 10 },
 ];
-const initialState: State = { assets: exampleAssets, newMoney: 5_000_000, mode: "buy-only", feeRate: 0, minTradeUnit: 10_000, tolerance: 1 };
+const initialState: State = { assets: exampleAssets, newMoney: 5_000_000, feeRate: 0, minTradeUnit: 10_000, tolerance: 1 };
 const COLORS = ["#2563eb", "#0f766e", "#d97706", "#7c3aed", "#db2777", "#64748b", "#16a34a", "#dc2626"];
 const ASSET_TYPES = ["국내 주식", "미국 주식", "배당 ETF", "성장 ETF", "채권", "금", "현금", "암호화폐", "기타"];
 
 export function RebalancingCalculator() {
   const { value, setValue } = useScenarioState<State>("investment-lab-rebalance", initialState);
   const normalizedAssets = useMemo(() => value.assets.map((asset) => ({ ...asset, target: asset.target / 100 })), [value.assets]);
-  const result = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: value.mode, feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.mode, value.feeRate, value.minTradeUnit, value.tolerance]);
   const tradePlan = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: "trade", feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.feeRate, value.minTradeUnit, value.tolerance]);
   const buyOnlyPlan = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: "buy-only", feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.feeRate, value.minTradeUnit, value.tolerance]);
+  const result = buyOnlyPlan;
   const targetSum = value.assets.reduce((sum, asset) => sum + asset.target, 0);
   const inputCurrentTotal = value.assets.reduce((sum, asset) => sum + asset.value, 0);
   const updateAsset = (id: string, patch: Partial<Asset>) => setValue({ ...value, assets: value.assets.map((asset) => asset.id === id ? { ...asset, ...patch } : asset) });
@@ -75,16 +74,7 @@ export function RebalancingCalculator() {
   };
   const tradeSummary = summarizePlan(tradePlan);
   const buyOnlySummary = summarizePlan(buyOnlyPlan);
-  const actualAdjustmentRows = result.rows.filter((row) => row.buy > 0.5 || row.sell > 0.5);
-  const finalGapRows = result.rows.map((row) => ({ ...row, finalGap: row.finalWeight - row.target }));
-  const maxGapRow = finalGapRows.length
-    ? [...finalGapRows].sort((a, b) => Math.abs(b.finalGap) - Math.abs(a.finalGap))[0]
-    : null;
-  const maxGap = maxGapRow ? Math.abs(maxGapRow.finalGap) : 0;
-  const toleranceExcess = Math.max(0, maxGap - toleranceRate);
-  const actualStructureText = actualAdjustmentRows.length
-    ? actualAdjustmentRows.map((row) => `${row.name} ${row.buy > 0 ? `${formatWon(row.buy)} 매수` : `${formatWon(row.sell)} 매도`}`).join(", ")
-    : "현재 조건에서는 별도의 매수·매도 금액이 계산되지 않았습니다.";
+
 
   const input = <>
     <Card>
@@ -145,14 +135,22 @@ export function RebalancingCalculator() {
         </div>
       </CardContent>
     </Card>
-    <Card><CardHeader><CardTitle>리밸런싱 방식</CardTitle></CardHeader><CardContent className="space-y-5"><NumberField label="신규 투자 가능 금액" value={value.newMoney} onChange={(newMoney) => setValue({ ...value, newMoney })} min={0} unit="만원" inputScale={10_000} /><div className="grid grid-cols-2 gap-2"><Button variant={value.mode === "trade" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "trade" })}>매수·매도 허용</Button><Button variant={value.mode === "buy-only" ? "default" : "secondary"} onClick={() => setValue({ ...value, mode: "buy-only" })}>신규자금만 활용</Button></div></CardContent></Card>
-    <AdvancedSettings title="프리셋·자산 분류·거래 조건" description="계산에 필수적이지 않은 분류와 거래 세부값입니다.">
+    <Card>
+      <CardHeader>
+        <CardTitle>리밸런싱 조건</CardTitle>
+        <p className="mt-1 text-xs text-slate-500">신규 투자금과 실제 거래 조건을 입력합니다.</p>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <NumberField label="신규 투자 가능 금액" value={value.newMoney} onChange={(newMoney) => setValue({ ...value, newMoney })} min={0} unit="만원" inputScale={10_000} />
+        <NumberField label="최소 거래단위" value={value.minTradeUnit} onChange={(minTradeUnit) => setValue({ ...value, minTradeUnit })} min={0} unit="만원" inputScale={10_000} />
+        <NumberField label="거래비용" value={value.feeRate} onChange={(feeRate) => setValue({ ...value, feeRate })} min={0} max={5} unit="%" />
+        <NumberField label="허용 오차 범위" value={value.tolerance} onChange={(tolerance) => setValue({ ...value, tolerance })} min={0} max={20} unit="%p" />
+      </CardContent>
+    </Card>
+    <AdvancedSettings title="프리셋·자산 분류" description="예시 포트폴리오와 자산 유형만 필요할 때 설정합니다.">
       <div className="space-y-5">
         <div><p className="mb-2 text-sm font-semibold text-slate-700">포트폴리오 예시</p><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="secondary" onClick={() => applyPreset("6040")}>60/40</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("growth")}>성장형</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("dividend")}>배당형</Button><Button size="sm" variant="secondary" onClick={() => applyPreset("retirement")}>은퇴형</Button></div></div>
         <div className="space-y-2"><p className="text-sm font-semibold text-slate-700">자산 유형</p>{value.assets.map((asset) => <label key={asset.id} className="grid grid-cols-[1fr_1fr] items-center gap-3 text-sm"><span className="truncate font-semibold text-slate-600">{asset.name}</span><select aria-label={`${asset.name} 자산 유형`} className="h-10 rounded-lg border px-2" value={asset.type} onChange={(event) => updateAsset(asset.id, { type: event.target.value })}>{ASSET_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>)}</div>
-        <NumberField label="거래비용" value={value.feeRate} onChange={(feeRate) => setValue({ ...value, feeRate })} min={0} max={5} unit="%" />
-        <NumberField label="최소 거래단위" value={value.minTradeUnit} onChange={(minTradeUnit) => setValue({ ...value, minTradeUnit })} min={0} unit="만원" inputScale={10_000} />
-        <NumberField label="허용 오차 범위" value={value.tolerance} onChange={(tolerance) => setValue({ ...value, tolerance })} min={0} max={20} unit="%p" />
       </div>
     </AdvancedSettings>
   </>;
@@ -161,8 +159,7 @@ export function RebalancingCalculator() {
     <Card>
       <CardHeader>
         <div>
-          <p className="text-xs font-black text-blue-600">1단계</p>
-          <CardTitle className="mt-1">허용 오차 기준 리밸런싱 비교</CardTitle>
+          <CardTitle>허용 오차 기준 리밸런싱 비교</CardTitle>
           <p className="mt-1 text-xs leading-5 text-slate-500">같은 신규 투자금과 거래 조건으로 두 방식의 조정 구조를 비교합니다.</p>
         </div>
       </CardHeader>
@@ -195,40 +192,12 @@ export function RebalancingCalculator() {
       </CardContent>
     </Card>
 
-    <Card>
-      <CardHeader>
-        <div>
-          <p className="text-xs font-black text-blue-600">2단계</p>
-          <CardTitle className="mt-1">입력한 신규 투자금 기준 실행안</CardTitle>
-          <p className="mt-1 text-xs leading-5 text-slate-500">설정한 리밸런싱 방식, 거래단위와 비용을 반영한 실제 배분 결과입니다.</p>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <MetricCard label="입력 신규 투자금" value={formatWon(value.newMoney)} />
-          <MetricCard label={value.mode === "buy-only" ? "실제 매수 배분액" : "실제 매수 총액"} value={formatWon(result.buyTotal)} tone="positive" />
-          <MetricCard label="최대 목표 비중 오차" value={formatPoint(maxGap)} tone={maxGap > toleranceRate ? "caution" : "positive"} note={maxGapRow ? `${maxGapRow.name}: 목표보다 ${formatPoint(maxGapRow.finalGap)} ${maxGapRow.finalGap >= 0 ? "높음" : "낮음"}` : undefined} />
-        </div>
-        <ResultMessage
-          conclusion={value.mode === "buy-only"
-            ? `${formatWon(value.newMoney)}의 신규 투자금은 목표보다 부족한 자산에 우선 배분됩니다.`
-            : `설정 조건을 반영한 실행안은 매수 ${formatWon(result.buyTotal)}, 매도 ${formatWon(result.sellTotal)}입니다.`}
-          reason={`실제 조정 구조는 ${actualStructureText}입니다. 조정 후 평균 목표 비중 오차는 ${formatPoint(result.averageGap)}입니다.`}
-          warning={maxGapRow
-            ? maxGap <= toleranceRate
-              ? `최대 오차는 ${formatPoint(maxGap)}로 설정한 허용 오차 ${value.tolerance.toFixed(2)}%p 이내입니다.`
-              : `최대 오차는 ${maxGapRow.name}에서 ${formatPoint(maxGap)}까지 벌어집니다. 설정한 허용 오차 ${value.tolerance.toFixed(2)}%p보다 ${formatPoint(toleranceExcess)} 큽니다.`
-            : undefined}
-        />
-      </CardContent>
-    </Card>
-
     <ChartCard title="현재 비중과 목표 비중"><ResponsiveContainer width="100%" height="100%"><BarChart data={chartData}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis unit="%" /><Tooltip formatter={(number) => `${Number(number).toFixed(1)}%`} /><Legend /><Bar dataKey="current" name="현재 비중" fill="#64748b" /><Bar dataKey="target" name="목표 비중" fill="#2563eb" /></BarChart></ResponsiveContainer></ChartCard>
-    <SecondaryResults><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"><MetricCard label="조정 후 총자산" value={formatWon(result.finalTotal)} /><MetricCard label="평균 목표 비중 오차" value={formatPoint(result.averageGap)} tone="caution" /><MetricCard label="최대 목표 비중 오차" value={formatPoint(maxGap)} tone={maxGap > toleranceRate ? "caution" : "positive"} /><MetricCard label="위험자산 비중" value={formatPercent(riskWeight)} tone={riskWeight > 0.8 ? "caution" : "default"} /><MetricCard label="안전자산 비중" value={formatPercent(1 - riskWeight)} /></div></SecondaryResults>
-    <AdvancedSettings title="구성 차트와 자산별 조정표" description="리밸런싱 전후 구성과 매수·매도 금액을 자세히 확인합니다.">
-      <div className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><ChartCard title="현재 포트폴리오"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={chartData} dataKey="current" nameKey="name" outerRadius={90} label={({ value }) => `${Number(value).toFixed(2)}%`}>{chartData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(number) => `${Number(number).toFixed(2)}%`} /></PieChart></ResponsiveContainer></ChartCard><ChartCard title="리밸런싱 후 포트폴리오"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={chartData} dataKey="final" nameKey="name" outerRadius={90} label={({ value }) => `${Number(value).toFixed(2)}%`}>{chartData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(number) => `${Number(number).toFixed(2)}%`} /></PieChart></ResponsiveContainer></ChartCard></div><Card><CardHeader><CardTitle>자산별 조정 결과</CardTitle></CardHeader><CardContent><div className="overflow-x-auto"><table className="min-w-[950px] w-full text-sm"><thead><tr className="border-b text-left"><th className="py-2">자산</th><th>현재 비중</th><th>목표 비중</th><th>목표 금액</th><th>매수</th><th>매도</th><th>예상 비중</th><th>목표 오차</th></tr></thead><tbody>{result.rows.map((row) => <tr key={row.id} className="border-b border-slate-100"><td className="py-3 font-bold">{row.name}</td><td>{formatPercent(row.currentWeight)}</td><td>{formatPercent(row.target)}</td><td>{formatWon(row.targetValue)}</td><td className="text-positive">{formatWon(row.buy)}</td><td className="text-negative">{formatWon(row.sell)}</td><td>{formatPercent(row.finalWeight)}</td><td className={Math.abs(row.finalWeight - row.target) > toleranceRate ? "font-bold text-caution" : "text-positive"}>{`${((row.finalWeight - row.target) * 100).toFixed(2)}%p`}</td></tr>)}</tbody></table></div></CardContent></Card></div>
+    <SecondaryResults><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"><MetricCard label="조정 후 총자산" value={formatWon(result.finalTotal)} /><MetricCard label="평균 목표 비중 오차" value={formatPoint(result.averageGap)} tone="caution" /><MetricCard label="최대 목표 비중 오차" value={formatPoint(buyOnlySummary.maxGap)} tone={buyOnlySummary.maxGap > toleranceRate ? "caution" : "positive"} /><MetricCard label="위험자산 비중" value={formatPercent(riskWeight)} tone={riskWeight > 0.8 ? "caution" : "default"} /><MetricCard label="안전자산 비중" value={formatPercent(1 - riskWeight)} /></div></SecondaryResults>
+    <AdvancedSettings title="구성 차트와 자산별 조정표" description="신규자금만 활용 기준의 구성과 자산별 배분 결과를 자세히 확인합니다.">
+      <div className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><ChartCard title="현재 포트폴리오"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={chartData} dataKey="current" nameKey="name" outerRadius={90} label={({ value }) => `${Number(value).toFixed(2)}%`}>{chartData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(number) => `${Number(number).toFixed(2)}%`} /></PieChart></ResponsiveContainer></ChartCard><ChartCard title="리밸런싱 후 포트폴리오"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={chartData} dataKey="final" nameKey="name" outerRadius={90} label={({ value }) => `${Number(value).toFixed(2)}%`}>{chartData.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip formatter={(number) => `${Number(number).toFixed(2)}%`} /></PieChart></ResponsiveContainer></ChartCard></div><Card><CardHeader><CardTitle>신규자금만 활용 기준 자산별 조정 결과</CardTitle></CardHeader><CardContent><div className="overflow-x-auto"><table className="min-w-[950px] w-full text-sm"><thead><tr className="border-b text-left"><th className="py-2">자산</th><th>현재 비중</th><th>목표 비중</th><th>목표 금액</th><th>매수</th><th>매도</th><th>예상 비중</th><th>목표 오차</th></tr></thead><tbody>{result.rows.map((row) => <tr key={row.id} className="border-b border-slate-100"><td className="py-3 font-bold">{row.name}</td><td>{formatPercent(row.currentWeight)}</td><td>{formatPercent(row.target)}</td><td>{formatWon(row.targetValue)}</td><td className="text-positive">{formatWon(row.buy)}</td><td className="text-negative">{formatWon(row.sell)}</td><td>{formatPercent(row.finalWeight)}</td><td className={Math.abs(row.finalWeight - row.target) > toleranceRate ? "font-bold text-caution" : "text-positive"}>{`${((row.finalWeight - row.target) * 100).toFixed(2)}%p`}</td></tr>)}</tbody></table></div></CardContent></Card></div>
     </AdvancedSettings>
   </>;
 
-  return <CalculatorShell title="포트폴리오 리밸런싱 계산기" description="현재 자산과 목표 비중을 비교해 매수·매도 금액 또는 신규 투자금의 우선 배분안을 계산합니다." headline="어떤 자산을 더 살지 고민하기 전에 현재 비중과 목표 비중의 차이를 확인해보세요." guideHref="/guides/portfolio-rebalancing" input={input} result={resultNode} education={[{ title: "리밸런싱", body: "목표 자산배분에서 벗어난 비중을 다시 조정하는 과정입니다. 수익이 난 자산 일부를 줄이고 부족한 자산을 채울 수 있습니다." }, { title: "신규자금 방식", body: "매도를 피하고 새 투자금만으로 부족 자산을 채웁니다. 이미 과대 비중인 자산이 있으면 목표를 정확히 맞추기 어렵습니다." }, { title: "가장 많이 하는 오해", body: "최근 수익률이 좋은 자산을 계속 더 사는 방식은 위험 집중을 키울 수 있습니다." }]} assumptions={["자산 유형은 분류용이며 계산에는 직접 영향을 주지 않습니다.", "매수·매도 허용 방식은 신규 투자 후 총자산을 기준으로 목표금액을 계산합니다.", `거래금액은 ${formatWon(value.minTradeUnit)} 단위로 반올림합니다. 허용 오차 ${value.tolerance}%p는 조정을 막는 기준이 아니라 최종 목표 비중과의 차이를 비교하는 기준으로 사용합니다.`]} />;
+  return <CalculatorShell title="포트폴리오 리밸런싱 계산기" description="현재 자산과 목표 비중을 비교해 매수·매도 금액 또는 신규 투자금의 우선 배분안을 계산합니다." headline="어떤 자산을 더 살지 고민하기 전에 현재 비중과 목표 비중의 차이를 확인해보세요." guideHref="/guides/portfolio-rebalancing" input={input} result={resultNode} education={[{ title: "리밸런싱", body: "목표 자산배분에서 벗어난 비중을 다시 조정하는 과정입니다. 수익이 난 자산 일부를 줄이고 부족한 자산을 채울 수 있습니다." }, { title: "신규자금 방식", body: "매도를 피하고 새 투자금만으로 부족 자산을 채웁니다. 이미 과대 비중인 자산이 있으면 목표를 정확히 맞추기 어렵습니다." }, { title: "가장 많이 하는 오해", body: "최근 수익률이 좋은 자산을 계속 더 사는 방식은 위험 집중을 키울 수 있습니다." }]} assumptions={["자산 유형은 분류용이며 계산에는 직접 영향을 주지 않습니다.", "결과에서는 매수·매도 허용 방식과 신규자금만 활용 방식을 같은 조건으로 비교합니다.", `거래금액은 ${formatWon(value.minTradeUnit)} 단위로 반올림합니다. 허용 오차 ${value.tolerance}%p는 조정을 막는 기준이 아니라 최종 목표 비중과의 차이를 비교하는 기준으로 사용합니다.`]} />;
 }
