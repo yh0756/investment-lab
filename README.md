@@ -71,12 +71,6 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.example
 - Removed the fractional-share purchase toggle from the dividend growth ETF calculator.
 - Dividend reinvestment now consistently assumes fractional-share purchases.
 
-## Public deployment contact setting
+## Contact
 
-Set the following Vercel environment variable before a public launch to enable the private email contact button on `/contact`.
-
-```env
-NEXT_PUBLIC_CONTACT_EMAIL=your-public-contact@example.com
-```
-
-After saving the variable, redeploy the project. If the variable is not set, the contact page displays the public GitHub Issues channel only.
+Public user inquiries are received only by email: `investcalc.help@gmail.com`.

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export const metadata = {
   title: "이용약관 및 면책 안내",
   description: "투자실험실의 서비스 이용 조건, 계산 결과의 성격, 이용자 책임 및 책임 제한 범위를 안내합니다."
@@ -70,7 +68,7 @@ export default function TermsPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>입력값과 계산 가정의 적절성을 확인할 책임은 이용자에게 있습니다.</li>
             <li>최종 투자 결정 및 그 결과에 대한 책임은 이용자에게 있습니다.</li>
-            <li>공유 주소, 문의 글 또는 공개 저장소에 계좌번호·비밀번호·주민등록번호 등 민감한 정보를 작성하지 않아야 합니다.</li>
+            <li>공유 주소나 문의 이메일에 계좌번호·비밀번호·주민등록번호 등 민감한 정보를 작성하지 않아야 합니다.</li>
             <li>브라우저 저장값이 삭제되거나 기기 간 동기화되지 않을 수 있으므로 중요한 자료는 별도로 기록해야 합니다.</li>
           </ul>
         </section>
@@ -96,7 +94,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-black text-slate-950">제8조 외부 서비스와 링크</h2>
           <p className="mt-3">
-            사이트에는 금융기관, 공공기관, Google, Vercel, GitHub 등 외부 사이트로 연결되는 링크가 포함될 수 있습니다.
+            사이트에는 금융기관, 공공기관, Google, Vercel 등 외부 사이트로 연결되는 링크가 포함될 수 있습니다.
             외부 서비스의 내용, 이용 가능성 및 개인정보 처리에 대해서는 해당 운영자의 정책이 적용됩니다.
           </p>
         </section>
@@ -131,7 +129,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-black text-slate-950">제12조 문의</h2>
           <p className="mt-3">
-            계산 오류, 서비스 이용 또는 정책 관련 문의는 <Link href="/contact" className="font-bold text-blue-700 underline underline-offset-4">문의 페이지</Link>를 이용해 주세요.
+            계산 오류, 서비스 이용 또는 정책 관련 문의는 <a href="mailto:investcalc.help@gmail.com" className="font-bold text-blue-700 underline underline-offset-4">investcalc.help@gmail.com</a>으로 보내주세요.
           </p>
         </section>
       </div>

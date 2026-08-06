@@ -38,7 +38,8 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-black text-slate-950">1. 적용 범위와 운영자</h2>
           <p className="mt-3">
             본 방침은 투자실험실 웹사이트에서 제공하는 투자 계산기, 계산 기준·개념 페이지 및 관련 안내 페이지에 적용됩니다.
-            서비스 운영 주체는 <strong>투자실험실 운영자</strong>이며, 개인정보 관련 문의는 <Link href="/contact" className="font-bold text-blue-700 underline underline-offset-4">문의 페이지</Link>를 통해 접수할 수 있습니다.
+            서비스 운영 주체는 <strong>투자실험실 운영자</strong>이며, 개인정보 관련 문의는
+            <a href="mailto:investcalc.help@gmail.com" className="ml-1 font-bold text-blue-700 underline underline-offset-4">investcalc.help@gmail.com</a>으로 접수할 수 있습니다.
           </p>
         </section>
 
@@ -71,8 +72,8 @@ export default function PrivacyPage() {
                 </tr>
                 <tr>
                   <td className="px-4 py-4 font-bold text-slate-900">문의 정보</td>
-                  <td className="px-4 py-4">이메일 주소, GitHub 계정명, 문의 내용과 첨부자료 등 이용자가 자발적으로 제공한 정보</td>
-                  <td className="px-4 py-4">문의 확인과 답변을 위해 처리하며, 목적 달성 후 합리적인 기간 내 삭제합니다. 공개 GitHub 이슈에 작성한 내용은 공개될 수 있습니다.</td>
+                  <td className="px-4 py-4">보낸 사람의 이메일 주소, 문의 내용과 첨부자료 등 이용자가 자발적으로 제공한 정보</td>
+                  <td className="px-4 py-4">문의 확인과 답변을 위해 처리하며, 문의 처리 완료 후 불필요해진 정보는 합리적인 기간 내 삭제합니다.</td>
                 </tr>
               </tbody>
             </table>
