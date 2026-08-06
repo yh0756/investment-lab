@@ -32,7 +32,8 @@ export function RebalancingCalculator() {
   const { value, setValue } = useScenarioState<State>("investment-lab-rebalance", initialState);
   const normalizedAssets = useMemo(() => value.assets.map((asset) => ({ ...asset, target: asset.target / 100 })), [value.assets]);
   const result = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: value.mode, feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.mode, value.feeRate, value.minTradeUnit, value.tolerance]);
-  const idealResult = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: "trade", feeRate: 0, minTradeUnit: 0, tolerance: 0 }), [normalizedAssets, value.newMoney]);
+  const tradePlan = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: "trade", feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.feeRate, value.minTradeUnit, value.tolerance]);
+  const buyOnlyPlan = useMemo(() => calculateRebalancing({ assets: normalizedAssets, newMoney: value.newMoney, mode: "buy-only", feeRate: value.feeRate / 100, minTradeUnit: value.minTradeUnit, tolerance: value.tolerance / 100 }), [normalizedAssets, value.newMoney, value.feeRate, value.minTradeUnit, value.tolerance]);
   const targetSum = value.assets.reduce((sum, asset) => sum + asset.target, 0);
   const inputCurrentTotal = value.assets.reduce((sum, asset) => sum + asset.value, 0);
   const updateAsset = (id: string, patch: Partial<Asset>) => setValue({ ...value, assets: value.assets.map((asset) => asset.id === id ? { ...asset, ...patch } : asset) });
@@ -52,22 +53,35 @@ export function RebalancingCalculator() {
   const chartData = result.rows.map((row) => ({ name: row.name, current: row.currentWeight * 100, target: row.target * 100, final: row.finalWeight * 100 }));
   const riskyTypes = new Set(["국내 주식", "미국 주식", "배당 ETF", "성장 ETF", "암호화폐"]);
   const riskWeight = result.currentTotal > 0 ? value.assets.filter((asset) => riskyTypes.has(asset.type)).reduce((sum, asset) => sum + asset.value, 0) / result.currentTotal : 0;
-  const idealAdjustmentRows = idealResult.rows.filter((row) => row.buy > 0.5 || row.sell > 0.5);
-  const largestIdealAdjustment = idealAdjustmentRows.length
-    ? [...idealAdjustmentRows].sort((a, b) => Math.max(b.buy, b.sell) - Math.max(a.buy, a.sell))[0]
-    : null;
+  const toleranceRate = value.tolerance / 100;
+  const formatPoint = (rate: number) => `${(Math.abs(rate) * 100).toFixed(2)}%p`;
+  const summarizePlan = (plan: typeof result) => {
+    const adjustmentRows = plan.rows.filter((row) => row.buy > 0.5 || row.sell > 0.5);
+    const gapRows = plan.rows.map((row) => ({ ...row, finalGap: row.finalWeight - row.target }));
+    const maxGapRow = gapRows.length
+      ? [...gapRows].sort((a, b) => Math.abs(b.finalGap) - Math.abs(a.finalGap))[0]
+      : null;
+    const maxGap = maxGapRow ? Math.abs(maxGapRow.finalGap) : 0;
+    return {
+      adjustmentRows,
+      maxGapRow,
+      maxGap,
+      withinTolerance: maxGap <= toleranceRate,
+      excess: Math.max(0, maxGap - toleranceRate),
+      structure: adjustmentRows.length
+        ? adjustmentRows.map((row) => `${row.name} ${row.buy > 0 ? `${formatWon(row.buy)} 매수` : `${formatWon(row.sell)} 매도`}`).join(" · ")
+        : "조정 없음",
+    };
+  };
+  const tradeSummary = summarizePlan(tradePlan);
+  const buyOnlySummary = summarizePlan(buyOnlyPlan);
   const actualAdjustmentRows = result.rows.filter((row) => row.buy > 0.5 || row.sell > 0.5);
   const finalGapRows = result.rows.map((row) => ({ ...row, finalGap: row.finalWeight - row.target }));
   const maxGapRow = finalGapRows.length
     ? [...finalGapRows].sort((a, b) => Math.abs(b.finalGap) - Math.abs(a.finalGap))[0]
     : null;
   const maxGap = maxGapRow ? Math.abs(maxGapRow.finalGap) : 0;
-  const toleranceRate = value.tolerance / 100;
   const toleranceExcess = Math.max(0, maxGap - toleranceRate);
-  const formatPoint = (rate: number) => `${(Math.abs(rate) * 100).toFixed(2)}%p`;
-  const idealStructureText = idealAdjustmentRows.length
-    ? idealAdjustmentRows.map((row) => `${row.name} ${row.buy > 0 ? `${formatWon(row.buy)} 매수` : `${formatWon(row.sell)} 매도`}`).join(", ")
-    : "현재 구성이 이미 목표 비중과 일치합니다.";
   const actualStructureText = actualAdjustmentRows.length
     ? actualAdjustmentRows.map((row) => `${row.name} ${row.buy > 0 ? `${formatWon(row.buy)} 매수` : `${formatWon(row.sell)} 매도`}`).join(", ")
     : "현재 조건에서는 별도의 매수·매도 금액이 계산되지 않았습니다.";
@@ -148,31 +162,35 @@ export function RebalancingCalculator() {
       <CardHeader>
         <div>
           <p className="text-xs font-black text-blue-600">1단계</p>
-          <CardTitle className="mt-1">목표 비중에 필요한 리밸런싱 구조</CardTitle>
-          <p className="mt-1 text-xs leading-5 text-slate-500">입력한 신규 투자금을 포함한 최종 총자산을 목표 비중에 정확히 맞출 때 필요한 전체 매수·매도 금액입니다.</p>
+          <CardTitle className="mt-1">허용 오차 기준 리밸런싱 비교</CardTitle>
+          <p className="mt-1 text-xs leading-5 text-slate-500">같은 신규 투자금과 거래 조건으로 두 방식의 조정 구조를 비교합니다.</p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <MetricCard label="필요 매수 총액" value={formatWon(idealResult.buyTotal)} tone="positive" />
-          <MetricCard label="필요 매도 총액" value={formatWon(idealResult.sellTotal)} tone="negative" />
-          <MetricCard label="가장 큰 조정" value={largestIdealAdjustment?.name ?? "조정 없음"} note={largestIdealAdjustment ? `${largestIdealAdjustment.buy > 0 ? "매수" : "매도"} ${formatWon(Math.max(largestIdealAdjustment.buy, largestIdealAdjustment.sell))}` : undefined} />
-        </div>
-        <ResultMessage
-          conclusion={idealResult.sellTotal > 0
-            ? `목표 비중을 정확히 맞추려면 매수 ${formatWon(idealResult.buyTotal)}, 매도 ${formatWon(idealResult.sellTotal)}가 필요합니다.`
-            : `목표 비중은 매도 없이 총 ${formatWon(idealResult.buyTotal)}를 매수하면 맞출 수 있습니다.`}
-          reason={`필요한 조정 구조는 ${idealStructureText}입니다.`}
-        />
-        <div className="space-y-2">
-          {idealAdjustmentRows.map((row) => <div key={row.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-bold text-slate-800">{row.name}</p>
-              <p className="mt-0.5 text-xs text-slate-500">현재 {formatPercent(row.currentWeight)} → 목표 {formatPercent(row.target)}</p>
+      <CardContent>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-black text-slate-900">매수·매도 허용</p>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${tradeSummary.withinTolerance ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                {tradeSummary.withinTolerance ? "허용 범위 내" : `초과 ${formatPoint(tradeSummary.excess)}`}
+              </span>
             </div>
-            <p className={`font-black ${row.buy > 0 ? "text-positive" : "text-negative"}`}>{row.buy > 0 ? `${formatWon(row.buy)} 매수` : `${formatWon(row.sell)} 매도`}</p>
-          </div>)}
-          {idealAdjustmentRows.length === 0 && <p className="rounded-xl bg-green-50 p-4 text-sm font-semibold text-positive">현재 포트폴리오가 목표 비중과 일치합니다.</p>}
+            <p className="mt-3 text-sm font-bold text-slate-800">매수 {formatWon(tradePlan.buyTotal)} · 매도 {formatWon(tradePlan.sellTotal)}</p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{tradeSummary.structure}</p>
+            <p className="mt-2 text-xs font-semibold text-slate-500">최대 오차 {formatPoint(tradeSummary.maxGap)}{tradeSummary.maxGapRow ? ` · ${tradeSummary.maxGapRow.name}` : ""}</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-black text-slate-900">신규자금만 활용</p>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${buyOnlySummary.withinTolerance ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                {buyOnlySummary.withinTolerance ? "허용 범위 내" : `초과 ${formatPoint(buyOnlySummary.excess)}`}
+              </span>
+            </div>
+            <p className="mt-3 text-sm font-bold text-slate-800">신규자금 {formatWon(value.newMoney)} · 배분 {formatWon(buyOnlyPlan.buyTotal)}</p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{buyOnlySummary.structure}</p>
+            <p className="mt-2 text-xs font-semibold text-slate-500">최대 오차 {formatPoint(buyOnlySummary.maxGap)}{buyOnlySummary.maxGapRow ? ` · ${buyOnlySummary.maxGapRow.name}` : ""}</p>
+          </div>
         </div>
       </CardContent>
     </Card>
