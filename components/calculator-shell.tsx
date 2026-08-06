@@ -12,20 +12,34 @@ export function CalculatorShell({ title, description, headline, actions, input, 
   assumptions: string[];
 }) {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <p className="mb-2 text-sm font-bold text-brand">투자실험실 계산기</p>
-        <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{title}</h1>
-        <p className="mt-3 max-w-3xl leading-7 text-slate-600">{description}</p>
-        <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 font-semibold text-navy">{headline}</div>
-        <div className="mt-4">{actions}</div>
+    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-6 border-b border-slate-200 pb-6">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brand">투자실험실 계산기</p>
+        <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">{title}</h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">{description}</p>
+        <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-semibold leading-6 text-navy">{headline}</p>
+          <div className="shrink-0">{actions}</div>
+        </div>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
-        <section className="space-y-4">{input}</section>
-        <section id="calculator-result" className="space-y-4 lg:sticky lg:top-4 lg:self-start">{result}</section>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black text-slate-900">조건 입력</h2>
+            <span className="text-xs text-slate-400">입력 즉시 결과 반영</span>
+          </div>
+          {input}
+        </section>
+        <section id="calculator-result" className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black text-slate-900">핵심 결과</h2>
+            <span className="text-xs text-slate-400">상세 결과는 펼쳐서 확인</span>
+          </div>
+          {result}
+        </section>
       </div>
-      <section className="mt-10">
-        <h2 className="text-2xl font-black text-slate-900">쉽게 이해하는 계산 원리</h2>
+      <section className="mt-12">
+        <h2 className="text-xl font-black text-slate-900 sm:text-2xl">쉽게 이해하는 계산 원리</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {education.map((item) => (
             <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-5">
