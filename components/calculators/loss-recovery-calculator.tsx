@@ -25,7 +25,7 @@ export function LossRecoveryCalculator() {
   const comparison = [10,20,30,40,50,60,70,80,90].map((loss) => ({ 손실률: `-${loss}%`, 필요상승률: `${(requiredRecoveryRate(loss / 100) * 100).toFixed(1)}%` }));
 
   const input = <>
-    <InputCard title="핵심 입력" description="현재 손실과 추가 투자 여부만 먼저 입력해 필요한 회복률을 확인하세요.">
+    <InputCard title="핵심 입력" description="현재 손실과 추가 투자·예상수익률을 입력해 필요한 회복률과 기간을 함께 확인하세요.">
       <NumberField label="초기 투자금" value={value.initial} onChange={(initial) => setValue({ ...value, initial })} min={0} unit="만원" inputScale={10_000} />
       <NumberField label="현재 손실률" value={value.lossRate} onChange={(lossRate) => setValue({ ...value, lossRate })} min={0} max={99} unit="%" slider />
       <NumberField label="즉시 추가 투자금" value={value.additional} onChange={(additional) => setValue({ ...value, additional })} min={0} unit="만원" inputScale={10_000} />
@@ -34,10 +34,17 @@ export function LossRecoveryCalculator() {
         <div className="grid grid-cols-2 gap-2"><Button variant={value.target === "initial" ? "default" : "secondary"} onClick={() => setValue({ ...value, target: "initial" })}>초기 원금</Button><Button variant={value.target === "total" ? "default" : "secondary"} onClick={() => setValue({ ...value, target: "total" })}>총 납입 원금</Button></div>
         <p className="mt-2 text-xs leading-5 text-slate-500">총 납입 원금은 추가 투자와 월 적립금까지 포함합니다.</p>
       </div>
+      <div className="border-t border-slate-200 pt-5">
+        <div className="mb-4">
+          <p className="font-bold text-slate-900">회복 기간 추정</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">예상수익률과 월 적립금을 반영해 회복 시점을 계산합니다.</p>
+        </div>
+        <div className="space-y-5">
+          <NumberField label="향후 예상 연평균 수익률" value={value.annualReturn} onChange={(annualReturn) => setValue({ ...value, annualReturn })} min={-20} max={30} unit="%" slider />
+          <NumberField label="월 추가 투자금" value={value.monthlyContribution} onChange={(monthlyContribution) => setValue({ ...value, monthlyContribution })} min={0} unit="만원" inputScale={10_000} />
+        </div>
+      </div>
     </InputCard>
-    <AdvancedSettings title="회복 기간 추정" description="예상수익률과 월 적립금을 반영해 회복 시점을 계산합니다.">
-      <div className="space-y-5"><NumberField label="향후 예상 연평균 수익률" value={value.annualReturn} onChange={(annualReturn) => setValue({ ...value, annualReturn })} min={-20} max={30} unit="%" slider /><NumberField label="월 추가 투자금" value={value.monthlyContribution} onChange={(monthlyContribution) => setValue({ ...value, monthlyContribution })} min={0} unit="만원" inputScale={10_000} /></div>
-    </AdvancedSettings>
   </>;
 
   const resultNode = <>
