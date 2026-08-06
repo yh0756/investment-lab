@@ -1,4 +1,4 @@
-export interface AssetInput { id: string; name: string; type: string; value: number; target: number; }
+export interface AssetInput { id: string; name: string; type?: string; value: number; target: number; }
 export type RebalanceMode = "trade" | "buy-only";
 export interface RebalanceInput { assets: AssetInput[]; newMoney: number; mode: RebalanceMode; feeRate: number; minTradeUnit?: number; tolerance?: number; }
 export interface RebalanceRow extends AssetInput { currentWeight: number; targetValue: number; difference: number; buy: number; sell: number; finalValue: number; finalWeight: number; }
