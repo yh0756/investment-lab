@@ -1,1 +1,27 @@
-export function JsonLd({ name, description }: { name: string; description: string }) { const data={"@context":"https://schema.org","@graph":[{"@type":"WebApplication",name,description,applicationCategory:"FinanceApplication",operatingSystem:"Web"},{"@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"투자실험실",item:"/"},{"@type":"ListItem",position:2,name}]},{"@type":"FAQPage",mainEntity:[{"@type":"Question",name:`${name}의 결과는 실제 수익률인가요?`,acceptedAnswer:{"@type":"Answer",text:"아니요. 사용자가 입력한 가정에 따른 교육용 시뮬레이션입니다."}}]}]}; return <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(data)}}/>; }
+import { siteUrl } from "@/lib/site-url";
+
+export function JsonLd({ name, description, path }: { name: string; description: string; path: string }) {
+  const pageUrl = `${siteUrl}${path}`;
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        name,
+        description,
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        url: pageUrl,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "투자실험실", item: siteUrl },
+          { "@type": "ListItem", position: 2, name, item: pageUrl },
+        ],
+      },
+    ],
+  };
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
+}

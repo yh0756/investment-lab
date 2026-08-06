@@ -20,7 +20,7 @@ interface State { initial: number; lossRate: number; additional: number; annualR
 const initialState: State = { initial: 10_000_000, lossRate: 40, additional: 2_000_000, annualReturn: 7, monthlyContribution: 300_000, target: "total" };
 
 export function LossRecoveryCalculator() {
-  const { value, setValue } = useScenarioState<State>("investment-lab-loss", initialState);
+  const { value, setValue } = useScenarioState<State>("investment-lab-loss-v2", initialState);
   const result = useMemo(() => calculateLossRecovery({ ...value, lossRate: value.lossRate / 100, annualReturn: value.annualReturn / 100 }), [value]);
   const comparison = [10,20,30,40,50,60,70,80,90].map((loss) => ({ 손실률: `-${loss}%`, 필요상승률: `${(requiredRecoveryRate(loss / 100) * 100).toFixed(1)}%` }));
 

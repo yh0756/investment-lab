@@ -2,10 +2,12 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight, BookOpen, Calculator, CheckCircle2, ChevronRight, Lightbulb, Sigma } from "lucide-react";
 import { calculators } from "@/lib/calculator-catalog";
 import type { CalculatorGuide } from "@/lib/calculator-guides";
+import { siteUrl } from "@/lib/site-url";
 
 export function CalculatorGuidePage({ guide }: { guide: CalculatorGuide }) {
   const current = calculators.find((calculator) => calculator.slug === guide.slug);
   const others = calculators.filter((calculator) => calculator.slug !== guide.slug);
+  const guideUrl = `${siteUrl}/guides/${guide.slug}`;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -14,13 +16,14 @@ export function CalculatorGuidePage({ guide }: { guide: CalculatorGuide }) {
         headline: guide.title,
         description: guide.seoDescription,
         author: { "@type": "Organization", name: "투자실험실" },
+        url: guideUrl,
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "투자실험실", item: "/" },
-          { "@type": "ListItem", position: 2, name: "계산 기준과 개념", item: "/guides" },
-          { "@type": "ListItem", position: 3, name: guide.title },
+          { "@type": "ListItem", position: 1, name: "투자실험실", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "계산 기준과 개념", item: `${siteUrl}/guides` },
+          { "@type": "ListItem", position: 3, name: guide.title, item: guideUrl },
         ],
       },
       {

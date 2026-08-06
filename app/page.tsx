@@ -10,7 +10,7 @@ export default function Home() {
           <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-bold text-brand">외부 API 없이 브라우저에서 즉시 계산</span>
           <h1 className="mt-6 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">복잡한 투자 문제를<br className="hidden sm:block" /> 직접 계산해보세요</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">회원가입 없이 나의 투자 조건을 입력하고 결과가 달라지는 이유까지 바로 확인할 수 있습니다.</p>
-          <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-600"><span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-positive" />입력 즉시 결과 업데이트</span><span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-brand" />금융정보 외부 전송 없음</span></div>
+          <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-600"><span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-positive" />입력 즉시 결과 업데이트</span><span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-brand" />계산 입력값은 브라우저에서 처리</span></div>
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">

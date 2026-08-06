@@ -2,12 +2,25 @@ export interface AssetInput { id: string; name: string; type?: string; value: nu
 export type RebalanceMode = "trade" | "buy-only";
 export interface RebalanceInput { assets: AssetInput[]; newMoney: number; mode: RebalanceMode; feeRate: number; minTradeUnit?: number; tolerance?: number; }
 export interface RebalanceRow extends AssetInput { currentWeight: number; targetValue: number; difference: number; buy: number; sell: number; finalValue: number; finalWeight: number; }
-export interface RebalanceResult { valid: boolean; totalTarget: number; currentTotal: number; finalTotal: number; rows: RebalanceRow[]; buyTotal: number; sellTotal: number; averageGap: number; exactPossible: boolean; }
+export interface RebalanceResult {
+  valid: boolean;
+  totalTarget: number;
+  currentTotal: number;
+  finalTotal: number;
+  rows: RebalanceRow[];
+  buyTotal: number;
+  sellTotal: number;
+  transactionCostTotal: number;
+  unallocatedCash: number;
+  averageGap: number;
+  exactPossible: boolean;
+}
 
 export function calculateRebalancing(input: RebalanceInput): RebalanceResult {
   const totalTarget = input.assets.reduce((sum, asset) => sum + asset.target, 0);
   const currentTotal = input.assets.reduce((sum, asset) => sum + asset.value, 0);
-  const plannedFinalTotal = currentTotal + input.newMoney;
+  const newMoney = Math.max(0, Number.isFinite(input.newMoney) ? input.newMoney : 0);
+  const plannedFinalTotal = currentTotal + newMoney;
 
   if (input.assets.length < 2 || Math.abs(totalTarget - 1) > 0.0001 || plannedFinalTotal < 0) {
     return {
@@ -18,6 +31,8 @@ export function calculateRebalancing(input: RebalanceInput): RebalanceResult {
       rows: [],
       buyTotal: 0,
       sellTotal: 0,
+      transactionCostTotal: 0,
+      unallocatedCash: 0,
       averageGap: 0,
       exactPossible: false,
     };
@@ -43,9 +58,28 @@ export function calculateRebalancing(input: RebalanceInput): RebalanceResult {
     const deficits = raw.map((asset) => Math.max(0, asset.targetValue - asset.value));
     const deficitTotal = deficits.reduce((sum, deficit) => sum + deficit, 0);
     allocations = deficitTotal > 0
-      ? deficits.map((deficit) => roundTrade(input.newMoney * deficit / deficitTotal, true))
+      ? deficits.map((deficit) => roundTrade(newMoney * deficit / deficitTotal, true))
       : deficits;
   }
+
+  if (input.mode === "trade" && unit > 0) {
+    let netAllocation = allocations.reduce((sum, adjustment) => sum + adjustment, 0);
+    while (netAllocation > newMoney + 0.0001) {
+      const buyIndex = allocations.reduce(
+        (largestIndex, adjustment, index, values) => adjustment > values[largestIndex] ? index : largestIndex,
+        0,
+      );
+      if (allocations[buyIndex] <= 0) break;
+      const reduction = Math.min(unit, allocations[buyIndex]);
+      allocations[buyIndex] -= reduction;
+      netAllocation -= reduction;
+    }
+  }
+
+  const buyTotal = allocations.reduce((sum, adjustment) => sum + Math.max(0, adjustment), 0);
+  const sellTotal = allocations.reduce((sum, adjustment) => sum + Math.max(0, -adjustment), 0);
+  const transactionCostTotal = (buyTotal + sellTotal) * input.feeRate;
+  const unallocatedCash = Math.max(0, newMoney + sellTotal - buyTotal);
 
   const preliminary = raw.map((asset, index) => {
     const adjustment = allocations[index];
@@ -63,25 +97,28 @@ export function calculateRebalancing(input: RebalanceInput): RebalanceResult {
     };
   });
 
-  const actualFinalTotal = preliminary.reduce((sum, row) => sum + row.finalValue, 0);
+  const investedAssetTotal = preliminary.reduce((sum, row) => sum + row.finalValue, 0);
+  const finalTotal = investedAssetTotal + unallocatedCash;
   const rows = preliminary.map((row) => ({
     ...row,
-    finalWeight: actualFinalTotal > 0 ? row.finalValue / actualFinalTotal : 0,
+    finalWeight: finalTotal > 0 ? row.finalValue / finalTotal : 0,
   }));
   const finalGaps = rows.map((row) => Math.abs(row.finalWeight - row.target));
   const averageGap = finalGaps.length > 0
     ? finalGaps.reduce((sum, gap) => sum + gap, 0) / finalGaps.length
     : 0;
-  const exactPossible = finalGaps.every((gap) => gap <= 0.0001);
+  const exactPossible = finalGaps.every((gap) => gap <= 0.0001) && unallocatedCash <= 0.01;
 
   return {
     valid: true,
     totalTarget,
     currentTotal,
-    finalTotal: actualFinalTotal,
+    finalTotal,
     rows,
-    buyTotal: rows.reduce((sum, row) => sum + row.buy, 0),
-    sellTotal: rows.reduce((sum, row) => sum + row.sell, 0),
+    buyTotal,
+    sellTotal,
+    transactionCostTotal,
+    unallocatedCash,
     averageGap,
     exactPossible,
   };

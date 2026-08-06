@@ -30,19 +30,26 @@ const presets: Record<string, number[]> = {
 };
 
 export function LeverageCalculator() {
-  const { value, setValue } = useScenarioState<State>("investment-lab-leverage", initialState);
+  const { value, setValue } = useScenarioState<State>("investment-lab-leverage-v2", initialState);
   const returns = useMemo(() => {
     if (value.mode === "repeat") return alternatingReturns(value.up / 100, value.down / 100, value.repeats);
     if (value.mode === "preset") return (presets[value.preset] ?? presets["횡보 반복장"]).map((v) => v / 100);
     return (value.customReturns ?? []).map((number) => number / 100).filter(Number.isFinite);
   }, [value]);
   const result = useMemo(() => calculateLeverage({ initial: value.initial, leverage: value.leverage, annualFee: value.annualFee / 100, periodsPerYear: value.periodsPerYear, returns }), [value, returns]);
-  const pathTone = result.pathEffect < -0.001 ? "negative" : result.pathEffect > 0.001 ? "positive" : "default";
-  const conclusion = result.pathEffect < -0.001 ? `단순 ${value.leverage}배 예상보다 ${formatPercent(Math.abs(result.pathEffect))} 낮은 결과입니다.` : result.pathEffect > 0.001 ? `안정적인 복리 경로가 단순 배수보다 ${formatPercent(result.pathEffect)} 유리하게 작용했습니다.` : "단순 배수 결과와 실제 누적 결과의 차이가 크지 않습니다.";
+  const totalLoss = result.finalEtf <= 0 || result.etfReturn <= -0.999999;
+  const pathTone = totalLoss || result.pathEffect < -0.001 ? "negative" : result.pathEffect > 0.001 ? "positive" : "default";
+  const conclusion = totalLoss
+    ? "레버리지 ETF 평가금액이 0원에 도달한 전액 손실 시나리오입니다."
+    : result.pathEffect < -0.001
+      ? `단순 ${value.leverage}배 예상보다 ${formatPercent(Math.abs(result.pathEffect))} 낮은 결과입니다.`
+      : result.pathEffect > 0.001
+        ? `복리 경로가 단순 배수보다 ${formatPercent(result.pathEffect)} 높게 나타났습니다.`
+        : "단순 배수 결과와 실제 누적 결과의 차이가 크지 않습니다.";
   const input = <>
     <Card><CardHeader><CardTitle>시나리오 선택</CardTitle></CardHeader><CardContent className="grid grid-cols-3 gap-2">{(["repeat","custom","preset"] as const).map((m)=><Button key={m} variant={value.mode===m?"default":"secondary"} size="sm" onClick={()=>setValue({...value,mode:m})}>{m==="repeat"?"간단 반복":m==="custom"?"직접 경로":"프리셋"}</Button>)}</CardContent></Card>
     <InputCard title="핵심 조건" description="투자금과 배수, 시장 움직임만 입력하면 바로 비교할 수 있습니다.">
-      <NumberField label="초기 투자금" value={value.initial} onChange={(initial)=>setValue({...value,initial})} min={0} unit="만원" inputScale={10_000}/>
+      <NumberField label="초기 투자금" value={value.initial} onChange={(initial)=>setValue({...value,initial})} min={10_000} unit="만원" inputScale={10_000}/>
       <NumberField label="레버리지 배수" value={value.leverage} onChange={(leverage)=>setValue({...value,leverage})} min={1} max={5} step={0.1} unit="배" slider/>
       <div className="grid grid-cols-3 gap-2">{[1,2,3].map((leverage)=><Button key={leverage} size="sm" variant={value.leverage===leverage?"default":"secondary"} onClick={()=>setValue({...value,leverage})}>{leverage}배</Button>)}</div>
       {value.mode==="repeat"&&<div className="space-y-5 rounded-2xl bg-slate-50 p-4"><NumberField label="상승 구간 수익률" value={value.up} onChange={(up)=>setValue({...value,up})} min={-99} max={100} step={0.1} unit="%" slider/><NumberField label="하락 구간 수익률" value={value.down} onChange={(down)=>setValue({...value,down})} min={-99} max={100} step={0.1} unit="%" slider/><NumberField label="반복 횟수" value={value.repeats} onChange={(repeats)=>setValue({...value,repeats:Math.round(repeats)})} min={1} max={50} unit="회" slider/></div>}
@@ -55,7 +62,7 @@ export function LeverageCalculator() {
   </>;
   const resultNode = <>
     <div className="grid gap-3 sm:grid-cols-3"><MetricCard label="레버리지 ETF 수익률" value={formatPercent(result.etfReturn)} tone={result.etfReturn>=0?"positive":"negative"}/><MetricCard label="최종 투자금" value={formatWon(result.finalEtf)} tone={result.finalEtf>=value.initial?"positive":"negative"}/><MetricCard label="경로 효과" value={formatPercent(result.pathEffect)} tone={pathTone}/></div>
-    <ResultMessage conclusion={conclusion} reason={`기초지수는 ${formatPercent(result.marketReturn)} 움직였고 실제 레버리지 ETF는 기간별 수익률을 매번 ${value.leverage}배 적용해 복리로 누적했습니다.`} warning={value.leverage>=3||returns.some((r)=>1+value.leverage*r<=0)?"고배율 또는 단일 기간 급락에서는 평가금액이 0에 가까워질 수 있습니다. 실제 상품에는 추적오차와 거래비용도 추가됩니다.":undefined}/>
+    <ResultMessage conclusion={conclusion} reason={`기초지수는 ${formatPercent(result.marketReturn)} 움직였고 실제 레버리지 ETF는 기간별 수익률을 매번 ${value.leverage}배 적용해 복리로 누적했습니다.`} warning={totalLoss ? "단일 기간 급락으로 계산상 전액 손실이 발생했습니다. 이후 시장이 회복해도 평가금액은 다시 증가하지 않는 것으로 계산합니다." : value.leverage>=3||returns.some((r)=>1+value.leverage*r<=0)?"고배율 또는 단일 기간 급락에서는 평가금액이 0에 가까워질 수 있습니다. 실제 상품에는 추적오차와 거래비용도 추가됩니다.":undefined}/>
     <ChartCard title="자산 가치 변화"><ResponsiveContainer width="100%" height="100%"><LineChart data={result.rows}><CartesianGrid strokeDasharray="3 3"/><XAxis dataKey="period"/><YAxis tickFormatter={(v)=>`${Math.round(v/10000)}만`}/><Tooltip formatter={(v)=>formatWon(Number(v),false)}/><Legend/><Line type="monotone" dataKey="marketValue" name="기초지수 1배" stroke="#64748b" dot={false}/><Line type="monotone" dataKey="etfValue" name="레버리지 ETF 실제" stroke="#2563eb" dot={false}/><Line type="monotone" dataKey="simpleValue" name="단순 배수" stroke="#d97706" dot={false} strokeDasharray="5 5"/></LineChart></ResponsiveContainer></ChartCard>
     <SecondaryResults><div className="grid gap-3 sm:grid-cols-3"><MetricCard label="기초지수 누적수익률" value={formatPercent(result.marketReturn)} tone={result.marketReturn>=0?"positive":"negative"}/><MetricCard label="단순 배수 예상수익률" value={formatPercent(result.simpleReturn)}/><MetricCard label="운용보수 누적 영향" value={formatWon(result.feeImpact)} tone="caution"/></div></SecondaryResults>
     <AdvancedSettings title="상세 차트와 기간별 표" description="기간별 수익률과 계산 과정을 확인합니다.">

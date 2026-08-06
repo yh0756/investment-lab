@@ -12,9 +12,15 @@ describe("레버리지 ETF 계산", () => {
     expect(result.finalMarket).toBeCloseTo(100, 6);
     expect(result.finalEtf).toBeLessThan(100);
   });
-  it("ETF 가치가 0 아래로 내려가지 않는다", () => {
+  it("ETF 가치와 단순 배수 결과가 -100% 아래로 내려가지 않는다", () => {
     const result = calculateLeverage({ initial: 100, leverage: 3, annualFee: 0, periodsPerYear: 252, returns: [-0.5, 0.2] });
     expect(result.finalEtf).toBe(0);
+    expect(result.simpleReturn).toBe(-1);
+  });
+  it("초기 투자금이 0이어도 NaN을 반환하지 않는다", () => {
+    const result = calculateLeverage({ initial: 0, leverage: 3, annualFee: 0, periodsPerYear: 252, returns: [0.1] });
+    expect(result.etfReturn).toBe(0);
+    expect(Number.isFinite(result.pathEffect)).toBe(true);
   });
   it("반복 수익률 배열을 만든다", () => expect(alternatingReturns(0.1, -0.05, 2)).toEqual([0.1, -0.05, 0.1, -0.05]));
 });
@@ -63,11 +69,25 @@ describe("리밸런싱 계산", () => {
     const r = calculateRebalancing({ assets, newMoney: 100, mode: "buy-only", feeRate: 0 });
     expect(r.rows.every((row) => row.buy >= 0 && row.sell === 0)).toBe(true);
   });
+  it("거래단위로 남은 신규자금은 미배분 현금과 총자산에 포함한다", () => {
+    const r = calculateRebalancing({ assets, newMoney: 103, mode: "buy-only", feeRate: 0, minTradeUnit: 10 });
+    expect(r.buyTotal + r.unallocatedCash).toBeCloseTo(103);
+    expect(r.finalTotal).toBeCloseTo(1103);
+  });
   it("허용 오차를 설정해도 필요한 조정금액을 계산한다", () => {
     const r = calculateRebalancing({ assets, newMoney: 100, mode: "trade", feeRate: 0, tolerance: 0.2 });
     expect(r.rows[0].sell).toBeCloseTo(50);
     expect(r.rows[1].buy).toBeCloseTo(150);
     expect(r.averageGap).toBeCloseTo(0);
+  });
+  it("거래단위 반올림으로 신규자금보다 많은 순매수가 발생하지 않는다", () => {
+    const threeAssets = [
+      { id: "a", name: "A", value: 334, target: 0.34 },
+      { id: "b", name: "B", value: 333, target: 0.34 },
+      { id: "c", name: "C", value: 333, target: 0.32 },
+    ];
+    const r = calculateRebalancing({ assets: threeAssets, newMoney: 0, mode: "trade", feeRate: 0, minTradeUnit: 10 });
+    expect(r.buyTotal - r.sellTotal).toBeLessThanOrEqual(0);
   });
 });
 

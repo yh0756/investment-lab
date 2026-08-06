@@ -37,10 +37,10 @@ export function CalculatorShell({ title, description, headline, guideHref, input
           </div>
           {input}
         </section>
-        <section id="calculator-result" className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+        <section id="calculator-result" className="space-y-4 lg:sticky lg:top-32 lg:self-start">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-sm font-black text-slate-900">핵심 결과</h2>
-            <span className="text-xs text-slate-400">상세 결과는 펼쳐서 확인</span>
+            <span className="text-xs text-slate-400">입력값을 바꾸면 결과가 바로 반영됩니다</span>
           </div>
           {result}
         </section>
