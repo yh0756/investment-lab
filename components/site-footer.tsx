@@ -10,6 +10,7 @@ export function SiteFooter() {
             <p className="mt-1">숫자로 미리 보는 투자 시나리오</p>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
+            <Link href="/about" className="hover:text-slate-900">이용 안내</Link>
             <Link href="/privacy" className="hover:text-slate-900">개인정보처리방침</Link>
             <Link href="/terms" className="hover:text-slate-900">이용약관·면책</Link>
             <Link href="/contact" className="hover:text-slate-900">문의</Link>

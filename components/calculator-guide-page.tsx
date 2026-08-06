@@ -16,6 +16,8 @@ export function CalculatorGuidePage({ guide }: { guide: CalculatorGuide }) {
         headline: guide.title,
         description: guide.seoDescription,
         author: { "@type": "Organization", name: "투자실험실" },
+        publisher: { "@type": "Organization", name: "투자실험실" },
+        dateModified: guide.reviewedAtIso,
         url: guideUrl,
       },
       {
@@ -99,6 +101,18 @@ export function CalculatorGuidePage({ guide }: { guide: CalculatorGuide }) {
             <div className="rounded-2xl bg-white p-5"><p className="text-xs font-black text-slate-500">계산 결과의 의미</p><p className="mt-2 text-sm leading-7 text-slate-700">{guide.example.result}</p></div>
           </div>
           <p className="mt-4 rounded-2xl bg-navy px-5 py-4 text-sm font-bold leading-6 text-white">핵심: {guide.example.takeaway}</p>
+          <details className="group mt-4 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <summary className="cursor-pointer list-none text-sm font-black text-navy">다른 조건 2가지도 비교하기</summary>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {guide.additionalExamples.map((item) => (
+                <article key={item.title} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <h3 className="text-sm font-black text-slate-900">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.scenario}</p>
+                  <p className="mt-3 border-t border-slate-100 pt-3 text-sm font-semibold leading-6 text-navy">{item.takeaway}</p>
+                </article>
+              ))}
+            </div>
+          </details>
         </section>
 
         <section>
@@ -131,6 +145,25 @@ export function CalculatorGuidePage({ guide }: { guide: CalculatorGuide }) {
               ))}
             </div>
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-wider text-brand">검토 정보</p>
+              <h2 className="mt-1 text-xl font-black text-slate-950">계산 근거와 확인 기준</h2>
+            </div>
+            <p className="text-xs font-semibold text-slate-500">콘텐츠 최종 검토일: {guide.reviewedAt}</p>
+          </div>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {guide.references.map((item) => (
+              <article key={item.title} className="rounded-xl bg-slate-50 p-4">
+                <h3 className="text-sm font-black text-slate-900">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+              </article>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">이 페이지는 실시간 시세를 제공하지 않습니다. 실제 내용을 검토하거나 계산 기준을 수정한 경우에만 최종 검토일을 갱신합니다.</p>
         </section>
 
         <section className="rounded-3xl bg-navy p-6 text-white sm:p-8">

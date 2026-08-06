@@ -9,9 +9,13 @@ export interface CalculatorGuide {
   highlights: Array<{ title: string; body: string }>;
   methods: Array<{ step: string; title: string; body: string; formula?: string }>;
   example: { title: string; scenario: string; result: string; takeaway: string };
+  additionalExamples: Array<{ title: string; scenario: string; takeaway: string }>;
   interpretations: Array<{ title: string; body: string }>;
   cautions: string[];
   faq: Array<{ question: string; answer: string }>;
+  references: Array<{ title: string; body: string }>;
+  reviewedAt: string;
+  reviewedAtIso: string;
 }
 
 export const calculatorGuides: Record<string, CalculatorGuide> = {
@@ -39,6 +43,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "3배 ETF는 첫 기간에 약 30% 상승하지만 다음 기간에는 약 27.27% 하락해 최종적으로 약 5.5% 손실이 발생합니다. 운용보수는 제외한 단순 예시입니다.",
       takeaway: "지수가 제자리로 돌아와도 레버리지 ETF는 손실일 수 있습니다.",
     },
+    additionalExamples: [
+      { title: "완만한 상승이 이어지는 경우", scenario: "기초지수가 네 기간 연속 2%씩 상승하면 매 기간 이익이 다음 기간의 기준금액에 더해집니다.", takeaway: "방향성이 일정할 때는 복리 효과가 단순 배수 예상보다 유리할 수 있습니다." },
+      { title: "급락 후 원점으로 회복하는 경우", scenario: "기초지수가 20% 하락한 뒤 25% 상승하면 지수는 원래 수준으로 돌아옵니다.", takeaway: "레버리지 상품은 하락 구간에서 줄어든 자산을 기준으로 회복하므로 같은 경로에서도 원금 회복이 어려울 수 있습니다." },
+    ],
     interpretations: [
       { title: "실제 결과가 더 낮을 때", body: "변동성이 복리 누적에 불리하게 작용한 것으로, 계산기에서는 변동성 손실로 표시합니다." },
       { title: "실제 결과가 더 높을 때", body: "상승이 비교적 일정하게 이어지며 복리 경로 효과가 유리하게 작용한 경우입니다." },
@@ -49,6 +57,12 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "지수가 10% 오르면 3배 ETF는 30% 오르나요?", answer: "하루 또는 상품이 정한 한 기간만 보면 목표에 가깝지만, 여러 기간의 누적수익률은 경로와 비용 때문에 정확히 3배가 아닙니다." },
       { question: "변동성 손실은 항상 발생하나요?", answer: "아닙니다. 일정한 방향으로 상승이 이어지면 복리 효과가 단순 배수보다 유리할 수도 있습니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "기간별 수익률을 순서대로 복리 적용하고, 각 기간마다 레버리지 배수와 비용을 다시 반영합니다." },
+      { title: "상품 확인 기준", body: "실제 투자 전에는 해당 ETF의 투자설명서에서 목표 추종 기간, 배수, 총보수와 파생상품 사용 구조를 확인해야 합니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
   "dividend-growth": {
     slug: "dividend-growth",
@@ -74,6 +88,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "배당성장형의 연간 배당금이 먼저 역전되더라도 초기 배당금 격차 때문에 누적 배당금 역전은 더 늦게 나타날 수 있습니다. 주가상승률까지 반영한 총자산은 또 다른 시점에 역전될 수 있습니다.",
       takeaway: "연간 배당금 역전과 누적 자산 역전은 같은 의미가 아닙니다.",
     },
+    additionalExamples: [
+      { title: "분배금을 모두 재투자하는 경우", scenario: "두 투자안의 세후 분배금을 매년 같은 상품에 다시 투자하면 보유 수량이 늘어납니다.", takeaway: "초기 분배율뿐 아니라 주가와 배당 성장의 조합이 총자산 역전 시점을 크게 바꿀 수 있습니다." },
+      { title: "현금흐름으로 모두 인출하는 경우", scenario: "분배금을 재투자하지 않고 생활비로 사용하면 누적 현금흐름과 평가자산을 따로 봐야 합니다.", takeaway: "생활비 목적이라면 총자산보다 연간 세후 배당금과 누적 수령액이 더 중요한 기준이 될 수 있습니다." },
+    ],
     interpretations: [
       { title: "연간 배당금만 역전", body: "현재 받는 배당은 성장형이 더 많아졌지만 과거 누적 현금흐름은 여전히 고배당형이 앞선 상태입니다." },
       { title: "총자산이 먼저 역전", body: "주가 성장과 배당 재투자가 배당금 격차보다 더 큰 영향을 준 경우입니다." },
@@ -84,6 +102,12 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "초기 배당률이 높으면 장기 배당도 항상 더 많나요?", answer: "아닙니다. 상대 상품의 배당성장률이 충분히 높고 오래 유지되면 연간 배당금이 역전될 수 있습니다." },
       { question: "어떤 역전 시점을 가장 중요하게 봐야 하나요?", answer: "현금흐름이 목적이면 연간·누적 배당금을, 자산 증식이 목적이면 총자산을 우선 확인하는 편이 적절합니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "첫해 배당금, 배당성장률, 주가상승률, 세금과 보수를 연도별로 순차 반영해 현금흐름과 평가금액을 계산합니다." },
+      { title: "상품 확인 기준", body: "실제 ETF 비교 시 운용사 공시에서 분배 정책, 최근 분배금 변동, 총보수와 기초지수 산출 방식을 확인해야 합니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
   "loss-recovery": {
     slug: "loss-recovery",
@@ -109,6 +133,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "600만 원에서 1,000만 원으로 가려면 약 66.7% 상승이 필요합니다. 200만 원을 추가 투자하면 평가금액은 800만 원이 되지만 총 납입원금 회복 목표는 1,200만 원이므로 필요한 상승률은 50%입니다.",
       takeaway: "추가 투자로 표시 손익률은 낮아져도 기존 손실이 사라지는 것은 아닙니다.",
     },
+    additionalExamples: [
+      { title: "20% 손실이 발생한 경우", scenario: "100에서 80으로 줄어든 자산이 다시 100이 되려면 20이 늘어야 합니다.", takeaway: "남은 80을 기준으로 계산하므로 필요한 상승률은 25%입니다." },
+      { title: "50% 손실이 발생한 경우", scenario: "100에서 50으로 줄어든 자산이 원금으로 돌아오려면 50이 늘어야 합니다.", takeaway: "남은 자산과 같은 금액이 추가로 필요하므로 100% 상승해야 회복됩니다." },
+    ],
     interpretations: [
       { title: "초기 원금 회복", body: "추가 투자금과 무관하게 처음 투자했던 금액까지 평가자산이 돌아오는지를 봅니다." },
       { title: "총 납입원금 회복", body: "초기 투자금과 이후 추가 납입금을 모두 합친 금액을 목표로 합니다." },
@@ -119,6 +147,12 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "20% 손실 후 필요한 상승률은 얼마인가요?", answer: "남은 자산 80을 100으로 만들려면 25% 상승이 필요합니다." },
       { question: "추가 투자하면 손실이 줄어든 건가요?", answer: "평균 매입단가와 표시 수익률은 개선될 수 있지만 기존에 발생한 평가손실 자체가 자동으로 없어지는 것은 아닙니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "현재 평가금액 대비 목표금액의 비율을 사용해 필요한 상승률을 계산하고, 월별 수익률과 추가 납입을 순서대로 반영합니다." },
+      { title: "해석 기준", body: "추가 투자 후에는 초기 원금 회복과 총 납입원금 회복을 분리해 확인해야 결과를 과대평가하지 않을 수 있습니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
   "portfolio-rebalancing": {
     slug: "portfolio-rebalancing",
@@ -144,6 +178,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "즉시 리밸런싱에서는 성장주 일부를 매도해 배당 ETF와 채권을 매수합니다. 매도 없이 신규자금만 사용할 경우 부족한 자산에 자금을 우선 배분하지만 목표 비중을 정확히 달성하지 못할 수 있습니다.",
       takeaway: "신규자금 리밸런싱은 세금과 매도를 줄이지만 조정 속도는 느릴 수 있습니다.",
     },
+    additionalExamples: [
+      { title: "신규자금이 충분한 경우", scenario: "목표보다 부족한 자산을 채울 수 있을 만큼 신규 투자금이 크면 매도 없이도 목표 비중에 가까워질 수 있습니다.", takeaway: "현금 유입이 꾸준한 적립식 투자자는 신규자금 리밸런싱을 우선 검토할 수 있습니다." },
+      { title: "신규자금이 부족한 경우", scenario: "과대 비중 자산의 초과 금액이 신규 투자금보다 크면 부족 자산에만 돈을 넣어도 목표 비중에 도달하지 못합니다.", takeaway: "목표와 현재 비중의 차이가 크다면 일부 매도 또는 더 긴 조정 기간이 필요할 수 있습니다." },
+    ],
     interpretations: [
       { title: "비중 차이가 큼", body: "시장 움직임이나 추가 납입으로 포트폴리오가 목표 위험 수준에서 크게 벗어난 상태입니다." },
       { title: "신규자금 적용 후 오차", body: "신규 투자금만 배분한 뒤 각 자산의 최종 비중이 목표보다 얼마나 높거나 낮은지 최대 오차와 평균 오차로 확인합니다." },
@@ -154,6 +192,12 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "목표 비중 합계가 왜 100%여야 하나요?", answer: "전체 자산을 빠짐없이 배분하는 기준이므로 각 목표 비중의 합계가 100%여야 목표 금액을 정확히 계산할 수 있습니다." },
       { question: "매도 없이도 리밸런싱할 수 있나요?", answer: "가능합니다. 신규 투자금과 배당금을 부족한 자산에 집중하면 점진적으로 목표 비중에 가까워질 수 있습니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "현재 총자산과 신규 투자금을 합산한 뒤 목표 비중을 곱해 자산별 목표 금액과 조정 금액을 계산합니다." },
+      { title: "운용 기준", body: "실제 적용 전에는 세금, 매매수수료, 거래 가능 단위와 계좌별 제한을 별도로 확인해야 합니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
   "goal-asset": {
     slug: "goal-asset",
@@ -179,6 +223,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "현재 자산의 성장분을 먼저 계산한 뒤 부족한 목표금액을 월 적립식 투자의 미래가치로 채우도록 월 투자금을 구합니다. 물가를 반영하면 미래의 명목 목표금액은 더 커집니다.",
       takeaway: "수익률을 과도하게 높이기보다 월 투자금과 기간을 함께 조정하는 편이 현실적입니다.",
     },
+    additionalExamples: [
+      { title: "월 투자금을 늘리는 경우", scenario: "같은 목표금액과 기대수익률에서 월 투자금을 늘리면 필요한 기간이 짧아집니다.", takeaway: "통제하기 어려운 수익률보다 통제 가능한 저축액을 조정하는 편이 계획의 실행 가능성을 높일 수 있습니다." },
+      { title: "목표 기간을 늘리는 경우", scenario: "같은 목표와 월 투자금에서 투자 기간을 늘리면 납입 횟수와 복리 적용 기간이 함께 증가합니다.", takeaway: "장기 계획에서는 수익률 1% 차이뿐 아니라 투자 기간의 차이도 결과에 큰 영향을 줍니다." },
+    ],
     interpretations: [
       { title: "필요 수익률이 매우 높음", body: "목표금액, 기간, 월 투자금의 조합이 현실적으로 공격적이라는 신호입니다." },
       { title: "월 투자금이 부담됨", body: "목표 기간을 늘리거나 목표금액을 단계화하고 현재 자산을 늘리는 대안을 비교해야 합니다." },
@@ -189,6 +237,12 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "월 투자금은 언제 납입하는 것으로 계산하나요?", answer: "모든 계산은 매월 말 납입을 기준으로 통일합니다." },
       { question: "물가상승률은 어떻게 반영되나요?", answer: "입력한 목표자산을 현재가치로 보고 투자 기간 동안의 물가상승률을 반영해 미래 명목 목표금액으로 변환합니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "연 수익률을 월 복리 수익률로 변환하고 현재 자산과 월말 납입금의 미래가치를 합산합니다." },
+      { title: "계획 수립 기준", body: "기대수익률 한 가지에 의존하지 않고 보수·기준·낙관 시나리오로 월 투자금과 필요 기간을 함께 비교하는 것이 좋습니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
   "share-buyback": {
     slug: "share-buyback",
@@ -214,6 +268,10 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       result: "순이익이 그대로라면 EPS는 단순히 5%가 아니라 약 5.3% 증가합니다. 남은 주식 수 95를 기준으로 같은 이익을 나누기 때문입니다. 다만 주식보상으로 2%가 새로 발행되면 순감소 효과는 약 3% 수준으로 낮아집니다.",
       takeaway: "매입 발표액보다 순주식 수 감소율이 실제 주주가치에 더 가깝습니다.",
     },
+    additionalExamples: [
+      { title: "높은 가격에서 매입하는 경우", scenario: "같은 자사주매입 예산이라도 평균 매입가격이 높아지면 회사가 사들일 수 있는 주식 수가 줄어듭니다.", takeaway: "매입 규모가 같아도 가격이 높을수록 주식 수 감소와 EPS 개선 효과는 작아집니다." },
+      { title: "주식보상이 함께 늘어나는 경우", scenario: "회사가 자사주를 매입하는 동시에 임직원 보상으로 신주를 발행하면 총매입 수량과 순감소 수량이 달라집니다.", takeaway: "주주가 확인해야 할 핵심은 총매입액보다 실제 희석을 반영한 순주식 수 변화입니다." },
+    ],
     interpretations: [
       { title: "매입 규모는 크지만 순감소는 작음", body: "주식보상이나 전환증권 희석이 자사주매입 효과를 상당 부분 상쇄하고 있습니다." },
       { title: "평균 매입가격이 높음", body: "같은 금액으로 매입할 수 있는 주식 수가 줄어 자본배분 효율이 낮아집니다." },
@@ -224,5 +282,11 @@ export const calculatorGuides: Record<string, CalculatorGuide> = {
       { question: "자사주매입 수익률과 주식 수 감소율은 같은가요?", answer: "매입가격이 현재 주가와 같고 신규 발행이 없을 때는 비슷하지만, 실제 매입가격과 주식보상·희석을 반영하면 달라집니다." },
       { question: "자사주를 소각해야만 EPS가 오르나요?", answer: "회계상 유통주식 수에서 제외되는 자기주식이라면 소각 전에도 EPS 계산에 영향을 줄 수 있지만, 법적·회계 처리와 향후 재발행 가능성은 별도로 확인해야 합니다." },
     ],
+    references: [
+      { title: "계산식 기준", body: "자사주매입 금액과 평균 매입가격으로 매입 수량을 계산하고, 신규 발행을 반영한 최종 주식 수로 EPS를 다시 계산합니다." },
+      { title: "공시 확인 기준", body: "실제 분석에서는 기업의 현금흐름표, 자기주식 취득 내역, 주식보상 비용과 가중평균 유통주식 수를 함께 확인해야 합니다." },
+    ],
+    reviewedAt: "2026년 8월 6일",
+    reviewedAtIso: "2026-08-06",
   },
 };
